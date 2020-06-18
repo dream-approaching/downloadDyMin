@@ -56,6 +56,7 @@ export default function Index() {
       setdownloadTask(null);
     };
     const task = wx.downloadFile({
+      // url: `/api/dy?url=${url}`,
       url: `https://zhengjinshou.cn/api/dy?url=${url}`,
       success: res => {
         const lastArr = arr => arr[arr.length - 1];
@@ -87,7 +88,9 @@ export default function Index() {
         //   duration: 1000
         // });
         console.log('err', err);
-        failFn();
+        setTimeout(() => {
+          failFn(err.errMsg);
+        }, 100);
       }
     });
 
