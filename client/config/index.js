@@ -12,15 +12,20 @@ const config = {
   babel: {
     sourceMap: true,
     presets: [
-      ['env', {
-        modules: false
-      }]
+      [
+        'env',
+        {
+          modules: false
+        }
+      ]
     ],
     plugins: [
       'transform-decorators-legacy',
       'transform-class-properties',
       'transform-object-rest-spread',
-      ['transform-runtime', {
+      [
+        'transform-runtime',
+        {
           helpers: false,
           polyfill: false,
           regenerator: true,
@@ -29,29 +34,19 @@ const config = {
       ]
     ]
   },
-  plugins: [
-    '@tarojs/plugin-less',
-    '@tarojs/plugin-terser'
-  ],
-  defineConstants: {
-  },
+  plugins: ['@tarojs/plugin-less', '@tarojs/plugin-terser'],
+  defineConstants: {},
   mini: {
     postcss: {
       autoprefixer: {
         enable: true,
         config: {
-          browsers: [
-            'last 3 versions',
-            'Android >= 4.1',
-            'ios >= 8'
-          ]
+          browsers: ['last 3 versions', 'Android >= 4.1', 'ios >= 8']
         }
       },
       pxtransform: {
         enable: true,
-        config: {
-
-        }
+        config: {}
       },
       url: {
         enable: true,
@@ -69,17 +64,14 @@ const config = {
     }
   },
   h5: {
+    esnextModules: ['taro-ui'],
     publicPath: '/',
     staticDirectory: 'static',
     postcss: {
       autoprefixer: {
         enable: true,
         config: {
-          browsers: [
-            'last 3 versions',
-            'Android >= 4.1',
-            'ios >= 8'
-          ]
+          browsers: ['last 3 versions', 'Android >= 4.1', 'ios >= 8']
         }
       },
       cssModules: {
@@ -91,11 +83,11 @@ const config = {
       }
     }
   }
-}
+};
 
-module.exports = function (merge) {
+module.exports = function(merge) {
   if (process.env.NODE_ENV === 'development') {
-    return merge({}, config, require('./dev'))
+    return merge({}, config, require('./dev'));
   }
-  return merge({}, config, require('./prod'))
-}
+  return merge({}, config, require('./prod'));
+};
