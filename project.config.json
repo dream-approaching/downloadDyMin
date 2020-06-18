@@ -5,7 +5,7 @@
 	"description": "download douyin video without watermask",
 	"appid": "wx6538fbecbfb04d60",
 	"setting": {
-		"urlCheck": false,
+		"urlCheck": true,
 		"es6": false,
 		"postcss": false,
 		"minified": false,

@@ -9,9 +9,10 @@ export default function Index() {
   // const [value, setValue] = useState(
   //   '这临时反应真的快#一直dou在你身边 @抖音小助手 https://v.douyin.com/JRLkxRy/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
-  const [value, setValue] = useState(
-    '最近天气真好，随手一拍 https://v.douyin.com/JRAvoCB/ 复制此链接，打开【抖音短视频】，直接观看视频！'
-  );
+  // const [value, setValue] = useState(
+  //   '最近天气真好，随手一拍 https://v.douyin.com/JRAvoCB/ 复制此链接，打开【抖音短视频】，直接观看视频！'
+  // );
+  const [value, setValue] = useState('');
   // const [value, setValue] = useState(
   //   '盘点电影十佳动作场面第二名快餐车！#成龙 #经典 #电影 #抖音热门 https://v.douyin.com/JdwUt1V/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
@@ -39,7 +40,11 @@ export default function Index() {
     const index2 = value.indexOf('复制');
     const url = value.slice(index1, index2 - 1);
     if (url.length < 5) {
-      return console.log('请检查复制的链接是否正确');
+      return Taro.showToast({
+        title: '请检查复制的链接是否正确',
+        icon: 'none',
+        duration: 1000
+      });
     }
     const failFn = text => {
       setProgressStatus('error');
@@ -48,14 +53,16 @@ export default function Index() {
         type: 'error'
       });
       setProgress(null);
+      setdownloadTask(null);
     };
     const task = wx.downloadFile({
-      url: `http://zhengjinshou.cn:8002/api/dy?url=${url}`,
+      url: `https://zhengjinshou.cn/api/dy?url=${url}`,
       success: res => {
         const lastArr = arr => arr[arr.length - 1];
         if (lastArr(res.tempFilePath.split('.')).toLowerCase() !== 'mp4') {
           failFn('解析错误，请重新尝试');
         } else {
+          setdownloadTask(null);
           // 如果不存在,表示是手动取消的
           if (intervalRef.current) {
             setProgressStatus('success');
@@ -74,6 +81,11 @@ export default function Index() {
         }
       },
       fail: err => {
+        // Taro.showToast({
+        //   title: JSON.stringify(err),
+        //   icon: 'none',
+        //   duration: 1000
+        // });
         console.log('err', err);
         failFn();
       }
@@ -100,7 +112,6 @@ export default function Index() {
     intervalRef.current = downloadTask;
   }, [downloadTask]);
 
-  console.log('progress', progress);
   const isDownloading = progress && progress !== 100;
   return (
     <View className='index'>
