@@ -20,7 +20,6 @@ async function runDouyin(shareUrl) {
   // 1.根据分享的视频地址，通过重定向获取整个html信息
   const { data: html } = await request(shareUrl);
   // 2.截取itemId， dytk 发起二次请求获取uriId
-  console.log('%chtml:', 'color: #0e93e0;background: #aaefe5;', html);
   const itemId = html.match(/(?<=itemId:\s\")\d+(?=\")/g)[0];
   const dytk = html.match(/(?<=dytk:\s\")(.*?)(?=\")/g)[0];
   const long_url = `https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=${itemId}&dytk=${dytk}`;
