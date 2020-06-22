@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import Taro, { useState, useRef, useEffect, useDidShow } from '@tarojs/taro';
 import { View, Text } from '@tarojs/components';
+import dayjs from 'dayjs';
 // eslint-disable-next-line no-unused-vars
 import { AtTextarea, AtButton, AtMessage, AtTimeline, AtProgress } from 'taro-ui';
 import './index.less';
@@ -10,13 +11,13 @@ export default function Index() {
   // const [value, setValue] = useState(
   //   '这临时反应真的快#一直dou在你身边 @抖音小助手 https://v.douyin.com/JRLkxRy/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
-  // const [value, setValue] = useState(
-  //   '最近天气真好，随手一拍 https://v.douyin.com/JRAvoCB/ 复制此链接，打开【抖音短视频】，直接观看视频！'
-  // );
-  // const [value, setValue] = useState('');
   const [value, setValue] = useState(
-    '我不过喜欢一个有Q的男朋友，我漂亮有错吗#李连杰 @DOU+小助手 https://v.douyin.com/JRuvXJn/ 复制此链接，打开【抖音短视频】，直接观看视频！'
+    '最近天气真好，随手一拍 https://v.douyin.com/JRAvoCB/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   );
+  // const [value, setValue] = useState('');
+  // const [value, setValue] = useState(
+  //   '我不过喜欢一个有Q的男朋友，我漂亮有错吗#李连杰 @DOU+小助手 https://v.douyin.com/JRuvXJn/ 复制此链接，打开【抖音短视频】，直接观看视频！'
+  // );
   // const [value, setValue] = useState(
   //   '盘点电影十佳动作场面第二名快餐车！#成龙 #经典 #电影 #抖音热门 https://v.douyin.com/JdwUt1V/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
@@ -53,14 +54,23 @@ export default function Index() {
       const downloadFn = (fileID, databaseId) => {
         wx.cloud.downloadFile({
           fileID,
-          success: res => {
+          success: async res => {
             console.log('%cdownloadFile res:', 'color: #0e93e0;background: #aaefe5;', res);
 
             console.log('%cdatabaseId:', 'color: #0e93e0;background: #aaefe5;', databaseId);
             // 调用云函数接口 下载次数加一
-            wx.cloud.callFunction({
+            await wx.cloud.callFunction({
               name: 'recordDownload',
               data: { databaseId, userInfo }
+            });
+            // 调用云函数接口 用户增加下载次数
+            await wx.cloud.callFunction({
+              name: 'setUsers',
+              data: {
+                userInfo,
+                type: 'download',
+                videoId: databaseId
+              }
             });
 
             Taro.saveVideoToPhotosAlbum({
@@ -183,6 +193,18 @@ export default function Index() {
   useEffect(() => {
     intervalRef.current = downloadTask;
   }, [downloadTask]);
+
+  useDidShow(async () => {
+    const authSettings = await Taro.getSetting();
+    if (authSettings.authSetting['scope.userInfo']) {
+      const userInfo = await Taro.getUserInfo();
+      // 如果已经授权，则更新一下lastLogin
+      await wx.cloud.callFunction({
+        name: 'setUsers',
+        data: { userInfo, updateObj: { lastLogin: dayjs().format('YYYY-MM-DD HH:mm:ss') } }
+      });
+    }
+  });
 
   const isDownloading = progress && progress !== 100;
   return (

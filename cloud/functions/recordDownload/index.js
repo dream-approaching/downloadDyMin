@@ -10,10 +10,8 @@ const _ = db.command;
 exports.main = async (event, context) => {
   const { databaseId, userInfo } = event;
   const recordRes = await videos.doc(databaseId).get();
-  console.log('%crecordRes:', 'color: #0e93e0;background: #aaefe5;', recordRes);
   const currentUsers = recordRes.data.downloadUsers;
   const userIsInRecord = currentUsers.some((item) => item.openId === userInfo.openId);
-  console.log('%cuserIsInRecord:', 'color: #0e93e0;background: #aaefe5;', userIsInRecord);
   const updateObj = {
     downloadTimes: _.inc(1),
   };

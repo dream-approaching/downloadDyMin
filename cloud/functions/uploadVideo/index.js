@@ -7,13 +7,13 @@ cloud.init({
 const db = cloud.database();
 const videos = db.collection('videos');
 
+const _ = db.command;
 exports.main = async (event) => {
   const { runDouyin } = require('./core');
   const { url, userInfo } = event;
   try {
     const { videoStream, share_title, size, coverArr } = await runDouyin(url);
     let { OPENID, UNIONID } = cloud.getWXContext();
-    const time = dayjs().format('YYYYMMDDHHmmss');
     // 先将部分信息写入videos表中，待视频上传完成后更新
     const addRes = await videos.add({
       data: {
@@ -24,11 +24,11 @@ exports.main = async (event) => {
         downloadTimes: 0,
         downloadUsers: [],
         uploadUser: { ...userInfo, openId: OPENID, unionId: UNIONID },
-        uploadTime: time,
+        uploadTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       },
     });
     // 上传视频
-    const videoName = `${OPENID}_${time}`;
+    const videoName = `${OPENID}_${dayjs().format('YYYYMMDDHHmmss')}`;
     const res = await cloud.uploadFile({
       cloudPath: `${videoName}.mp4`,
       fileContent: videoStream,
@@ -38,6 +38,15 @@ exports.main = async (event) => {
       data: {
         fileId: res.fileID,
         storageName: videoName,
+      },
+    });
+    // 调用云函数 更新用户信息
+    await cloud.callFunction({
+      name: 'setUsers',
+      data: {
+        userInfo,
+        type: 'upload',
+        videoId: addRes._id,
       },
     });
     console.log('%cres2:', 'color: #0e93e0;background: #aaefe5;', res);
