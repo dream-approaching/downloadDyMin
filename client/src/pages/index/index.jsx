@@ -46,11 +46,23 @@ export default function Index() {
       if (url.length < 5) {
         return MyToast('请检查复制的链接是否正确');
       }
-      const downloadFn = fileID => {
+      /**
+       * @param fileID 用于下载
+       * @param databaseId 用于数据上报
+       */
+      const downloadFn = (fileID, databaseId) => {
         wx.cloud.downloadFile({
           fileID,
           success: res => {
             console.log('%cdownloadFile res:', 'color: #0e93e0;background: #aaefe5;', res);
+
+            console.log('%cdatabaseId:', 'color: #0e93e0;background: #aaefe5;', databaseId);
+            // 调用云函数接口 下载次数加一
+            wx.cloud.callFunction({
+              name: 'recordDownload',
+              data: { databaseId, userInfo }
+            });
+
             Taro.saveVideoToPhotosAlbum({
               filePath: res.tempFilePath,
               success(res2) {
@@ -80,7 +92,8 @@ export default function Index() {
       });
       console.log('%ccheckHasVideo:', 'color: #0e93e0;background: #aaefe5;', checkHasVideo);
       if (checkHasVideo.result.length > 0) {
-        downloadFn(checkHasVideo.result[0].fileId);
+        const video = checkHasVideo.result[0];
+        downloadFn(video.fileId, video._id);
       } else {
         wx.cloud.callFunction({
           // 云函数名称
@@ -89,7 +102,7 @@ export default function Index() {
           data: { url, userInfo },
           success: uploadRes => {
             console.log('res', uploadRes); // 3
-            downloadFn(uploadRes.result.fileID);
+            downloadFn(uploadRes.result.fileID, uploadRes.result.databaseId);
             // wx.cloud.callFunction({
             //   name: 'downloadVideo',
             //   data: { fileID: uploadRes.result.fileID },

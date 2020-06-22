@@ -24,16 +24,19 @@ async function runDouyin(shareUrl) {
   const dytk = html.match(/(?<=dytk:\s\")(.*?)(?=\")/g)[0];
   const long_url = `https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=${itemId}&dytk=${dytk}`;
   const { data: videoJson } = await request(long_url);
+  console.log('%cvideoJson:', 'color: #0e93e0;background: #aaefe5;', videoJson);
 
   // 3.最后通过uri参数来调用视频下载接口
   const uriId = videoJson.item_list[0].video.play_addr.uri;
   const share_title = videoJson.item_list[0].share_info.share_title;
   const noWatermarkUrl = `https://aweme.snssdk.com/aweme/v1/play/?video_id=${uriId}&line=0&ratio=540p&media_type=4&vr_type=0&improve_bitrate=0&is_play_url=1&is_support_h265=0&source=PackSourceEnum_PUBLISH`;
+  const coverArr = videoJson.item_list[0].video.cover.url_list;
 
   const res = await request(noWatermarkUrl, 'arraybuffer');
+  console.log('%cres:', 'color: #0e93e0;background: #aaefe5;', res);
   const size = res.headers['content-length'];
   const { data: videoStream } = res;
-  return { videoStream, share_title, size };
+  return { videoStream, share_title, size, coverArr };
 }
 
 module.exports = {
