@@ -13,13 +13,13 @@ exports.main = async (event, context) => {
       url: _.eq(event.url),
     })
     .get();
-  if (filterList.data.length > 0 && !filterList.data[0].fileId) {
-    await videos
-      .where({
-        url: _.eq(event.url),
-      })
-      .remove();
-    return [];
-  }
+  // if (filterList.data.length > 0 && !filterList.data[0].fileId) {
+  //   await videos
+  //     .where({
+  //       url: _.eq(event.url),
+  //     })
+  //     .remove();
+  //   return [];
+  // }
   return filterList.data;
 };

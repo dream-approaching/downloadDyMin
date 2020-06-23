@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 
-const MyToast = (text, icon = 'none', duration = 3000) => {
+const MyToast = (text, duration = 2000, icon = 'none') => {
   Taro.showToast({
     title: text,
     icon,
