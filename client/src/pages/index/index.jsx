@@ -1,18 +1,21 @@
 /* eslint-disable no-undef */
 import Taro, { useState, useRef, useEffect, useDidShow } from '@tarojs/taro';
-import { View, Text, Button } from '@tarojs/components';
+import { View, Text, Button, Image } from '@tarojs/components';
 import dayjs from 'dayjs';
 // eslint-disable-next-line no-unused-vars
 import {
   AtTextarea,
   AtButton,
   AtMessage,
-  AtTimeline,
   AtProgress,
   AtModal,
   AtModalContent,
-  AtModalAction
+  AtModalAction,
+  AtList,
+  AtListItem
 } from 'taro-ui';
+import step1 from '../../assets/step1.jpg';
+import step2 from '../../assets/step2.jpg';
 import './index.less';
 import MyToast from '../../components/Toast';
 
@@ -225,6 +228,8 @@ export default function Index() {
     };
   }, [waitFileIdInterval]);
 
+  const [showCurtain, setShowCurtain] = useState(false);
+  const [curtainImg, setCurtainImg] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [clipboardText, setClipboardText] = useState('');
   useDidShow(async () => {
@@ -237,8 +242,6 @@ export default function Index() {
       if (clipboard.data.indexOf('https://v.douyin.com') > -1) {
         setModalOpen(true);
         setClipboardText(clipboard.data);
-        // 设置成功后清除剪切板
-        Taro.setClipboardData({ data: '', success: wx.hideToast });
       }
     } catch (error) {
       console.log('error 227', error);
@@ -255,20 +258,41 @@ export default function Index() {
     }
   });
 
+  const clearClipboard = () => Taro.setClipboardData({ data: '', success: wx.hideToast });
+
   console.log('%cprogress:', 'color: #0e93e0;background: #aaefe5;', progress);
   const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
+  const tipArr = [
+    { id: 1, title: '打开抖音，选择需要去水印的视频', pic: step1 },
+    { id: 2, title: '点击分享按钮，选择复制链接', pic: step2 },
+    { id: 3, title: '打开小程序，自动识别链接(若识别失败请手动粘贴)' },
+    { id: 4, title: '点击下载' }
+  ];
   return (
     <View className='index'>
       <AtMessage />
-      <Text className='title'>说明</Text>
-      <AtTimeline
-        className='list'
-        items={[
-          { title: '点击抖音分享按钮，点击复制链接' },
-          { title: '粘贴到文本框' },
-          { title: '点击下载' }
-        ]}
-      ></AtTimeline>
+      <View className='title'>
+        <Text>说明</Text>
+      </View>
+      <AtList hasBorder={false} className='list'>
+        {tipArr.map(item => {
+          return (
+            <AtListItem
+              key={item.id}
+              onClick={() => {
+                if (item.pic) {
+                  setShowCurtain(true);
+                  setCurtainImg(item.pic);
+                }
+              }}
+              arrow={item.pic && 'right'}
+              hasBorder={false}
+              className='itemText'
+              title={`${item.id}、${item.title}`}
+            />
+          );
+        })}
+      </AtList>
       <AtTextarea
         name='value'
         type='text'
@@ -276,8 +300,10 @@ export default function Index() {
         value={value}
         onChange={handleChange}
         clear
-        autoFocus
+        // autoFocus
         border
+        maxLength={240}
+        height={220}
         adjustPosition
         className='input'
       />
@@ -304,19 +330,39 @@ export default function Index() {
           取消下载
         </AtButton>
       )}
-      <AtModal isOpened={modalOpen}>
+      <AtModal isOpened={modalOpen && !showCurtain}>
         <AtModalContent>检测到链接：{clipboardText} 是否填入？</AtModalContent>
         <AtModalAction>
-          <Button onClick={() => setModalOpen(false)}>取消</Button>
+          <Button
+            onClick={() => {
+              setModalOpen(false);
+              clearClipboard();
+            }}
+          >
+            取消
+          </Button>
           <Button
             onClick={() => {
               handleChange(clipboardText);
               setModalOpen(false);
+              // 设置成功后清除剪切板
+              clearClipboard();
             }}
           >
             确定
           </Button>
         </AtModalAction>
+      </AtModal>
+      <AtModal
+        className='imgModal'
+        isOpened={showCurtain}
+        onClose={async () => {
+          await setModalOpen(false);
+          await setShowCurtain(false);
+          setCurtainImg(null);
+        }}
+      >
+        <Image className='tipImg' mode='aspectFit' src={curtainImg} />
       </AtModal>
     </View>
   );
