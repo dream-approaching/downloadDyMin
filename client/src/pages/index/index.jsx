@@ -1,13 +1,22 @@
 /* eslint-disable no-undef */
 import Taro, { useState, useRef, useEffect, useDidShow } from '@tarojs/taro';
-import { View, Text } from '@tarojs/components';
+import { View, Text, Button } from '@tarojs/components';
 import dayjs from 'dayjs';
 // eslint-disable-next-line no-unused-vars
-import { AtTextarea, AtButton, AtMessage, AtTimeline, AtProgress } from 'taro-ui';
+import {
+  AtTextarea,
+  AtButton,
+  AtMessage,
+  AtTimeline,
+  AtProgress,
+  AtModal,
+  AtModalContent,
+  AtModalAction
+} from 'taro-ui';
 import './index.less';
 import MyToast from '../../components/Toast';
 
-const RETRY_TIMES = 3;
+const RETRY_TIMES = 5;
 export default function Index() {
   // const [value, setValue] = useState(
   //   '这临时反应真的快#一直dou在你身边 @抖音小助手 https://v.douyin.com/JRLkxRy/ 复制此链接，打开【抖音短视频】，直接观看视频！'
@@ -216,11 +225,29 @@ export default function Index() {
     };
   }, [waitFileIdInterval]);
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [clipboardText, setClipboardText] = useState('');
   useDidShow(async () => {
+    console.log('didShow');
+
+    // 获取剪切板内容
+    try {
+      const clipboard = await Taro.getClipboardData();
+      console.log('%cclipboard:', 'color: #0e93e0;background: #aaefe5;', clipboard);
+      if (clipboard.data.indexOf('https://v.douyin.com') > -1) {
+        setModalOpen(true);
+        setClipboardText(clipboard.data);
+        // 设置成功后清除剪切板
+        Taro.setClipboardData({ data: '', success: wx.hideToast });
+      }
+    } catch (error) {
+      console.log('error 227', error);
+    }
+
+    // 如果已经授权，则更新一下lastLogin
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
       const userInfo = await Taro.getUserInfo();
-      // 如果已经授权，则更新一下lastLogin
       await wx.cloud.callFunction({
         name: 'setUsers',
         data: { userInfo, updateObj: { lastLogin: dayjs().format('YYYY-MM-DD HH:mm:ss') } }
@@ -277,6 +304,20 @@ export default function Index() {
           取消下载
         </AtButton>
       )}
+      <AtModal isOpened={modalOpen}>
+        <AtModalContent>检测到链接：{clipboardText} 是否填入？</AtModalContent>
+        <AtModalAction>
+          <Button onClick={() => setModalOpen(false)}>取消</Button>
+          <Button
+            onClick={() => {
+              handleChange(clipboardText);
+              setModalOpen(false);
+            }}
+          >
+            确定
+          </Button>
+        </AtModalAction>
+      </AtModal>
     </View>
   );
 }
