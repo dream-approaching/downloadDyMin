@@ -15,10 +15,10 @@ export default function Index() {
   // const [value, setValue] = useState(
   //   '最近天气真好，随手一拍 https://v.douyin.com/JRAvoCB/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
-  // const [value, setValue] = useState('');
-  const [value, setValue] = useState(
-    '我不过喜欢一个有Q的男朋友，我漂亮有错吗#李连杰 @DOU+小助手 https://v.douyin.com/JRuvXJn/ 复制此链接，打开【抖音短视频】，直接观看视频！'
-  );
+  const [value, setValue] = useState('');
+  // const [value, setValue] = useState(
+  //   '我不过喜欢一个有Q的男朋友，我漂亮有错吗#李连杰 @DOU+小助手 https://v.douyin.com/JRuvXJn/ 复制此链接，打开【抖音短视频】，直接观看视频！'
+  // );
   // const [value, setValue] = useState(
   //   '盘点电影十佳动作场面第二名快餐车！#成龙 #经典 #电影 #抖音热门 https://v.douyin.com/JdwUt1V/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
@@ -35,6 +35,7 @@ export default function Index() {
   };
 
   let retryTimes = 0;
+  let waitFileIdInterval = null;
   const handleDownload = async () => {
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
@@ -71,64 +72,66 @@ export default function Index() {
           fileID,
           success: async res => {
             console.log('%cdownloadFile res:', 'color: #0e93e0;background: #aaefe5;', res);
-
             console.log('%cdatabaseId:', 'color: #0e93e0;background: #aaefe5;', databaseId);
-
             retryTimes = 0;
             // 界面逻辑
             setdownloadTask(null);
+            console.log(
+              '%cdownloadTaskRef:',
+              'color: #0e93e0;background: #aaefe5;',
+              downloadTaskRef
+            );
+            // 如果不存在,表示是手动取消的
             if (downloadTaskRef.current) {
-              // 如果不存在,表示是手动取消的
               setProgressStatus('success');
               Taro.atMessage({
                 message: '下载成功',
                 type: 'success'
               });
               // setProgress(null);
+
+              // 调用云函数接口 下载次数加一
+              await wx.cloud.callFunction({
+                name: 'recordDownload',
+                data: { databaseId, userInfo }
+              });
+              // 调用云函数接口 用户增加下载次数
+              await wx.cloud.callFunction({
+                name: 'setUsers',
+                data: {
+                  userInfo,
+                  type: 'download',
+                  videoId: databaseId
+                }
+              });
+              // 保存到相册
+              Taro.saveVideoToPhotosAlbum({
+                filePath: res.tempFilePath,
+                success(res2) {
+                  console.log(res2.errMsg);
+                }
+              });
             }
-
-            // 调用云函数接口 下载次数加一
-            await wx.cloud.callFunction({
-              name: 'recordDownload',
-              data: { databaseId, userInfo }
-            });
-
-            // 调用云函数接口 用户增加下载次数
-            await wx.cloud.callFunction({
-              name: 'setUsers',
-              data: {
-                userInfo,
-                type: 'download',
-                videoId: databaseId
-              }
-            });
-
-            // 保存到相册
-            Taro.saveVideoToPhotosAlbum({
-              filePath: res.tempFilePath,
-              success(res2) {
-                console.log(res2.errMsg);
-              }
-            });
           },
           fail: err => {
-            console.log('%cerr114:', 'color: #0e93e0;background: #aaefe5;', err);
+            console.log('%cerr116:', 'color: #0e93e0;background: #aaefe5;', err);
             if (err.errMsg.indexOf('parameter.fileID should be string') > -1) {
               console.log('%cretryTimes:', 'color: #0e93e0;background: #aaefe5;', retryTimes);
               if (retryTimes >= RETRY_TIMES) {
                 retryTimes = 0;
                 return failFn('抱歉，失败次数过多，请检查链接或选择其他视频');
               } else {
-                MyToast('解析错误，正为您重试...', 1000);
+                MyToast('解析错误，正为您重试', 1000);
                 setTimeout(async () => {
                   retryTimes += 1;
                   handleDownload();
                 }, 100);
               }
+            } else if (err.errMsg.indexOf('ERR_CONNECTION_ABORTED') > -1) {
+              MyToast('网络错误，正为您重试', 1000);
+              handleDownload();
             } else {
-              setTimeout(() => {
-                failFn(err.errMsg);
-              }, 100);
+              failFn('下载失败，请重新尝试');
             }
           }
         });
@@ -150,18 +153,21 @@ export default function Index() {
       console.log('%ccheckHasVideo:', 'color: #0e93e0;background: #aaefe5;', checkHasVideo);
       if (checkHasVideo.result.length > 0) {
         const video = checkHasVideo.result[0];
+        console.log('%cvideo:', 'color: #0e93e0;background: #aaefe5;', video);
         // 没有fileId表示视频还未上传完成，再次轮询
         if (!video.fileId) {
-          const waitFileIdInterval = setInterval(async () => {
+          console.log('没有fileId表示视频还未上传完成，再次轮询');
+          waitFileIdInterval = setInterval(async () => {
             const againCheck = await wx.cloud.callFunction({
               name: 'checkHasVideo',
               data: { url }
             });
-            if (againCheck.result[0].fileID) {
+            console.log('%cagainCheck:', 'color: #0e93e0;background: #aaefe5;', againCheck);
+            if (againCheck.result[0].fileId) {
               clearInterval(waitFileIdInterval);
               downloadFn(video.fileId, video._id);
             }
-          }, 500);
+          }, 1000);
         } else {
           downloadFn(video.fileId, video._id);
         }
@@ -203,6 +209,13 @@ export default function Index() {
     downloadTaskRef.current = downloadTask;
   }, [downloadTask]);
 
+  // 组件卸载时清除定时器
+  useEffect(() => {
+    return () => {
+      waitFileIdInterval && clearInterval(waitFileIdInterval);
+    };
+  }, [waitFileIdInterval]);
+
   useDidShow(async () => {
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
@@ -216,7 +229,7 @@ export default function Index() {
   });
 
   console.log('%cprogress:', 'color: #0e93e0;background: #aaefe5;', progress);
-  const isDownloading = progress && progress.percent !== 100;
+  const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
   return (
     <View className='index'>
       <AtMessage />
@@ -259,7 +272,7 @@ export default function Index() {
           </View>
         </View>
       )}
-      {isDownloading && (
+      {isDownloading && downloadTask && (
         <AtButton onClick={cancleDownload} size='small' className='cancelBtn'>
           取消下载
         </AtButton>

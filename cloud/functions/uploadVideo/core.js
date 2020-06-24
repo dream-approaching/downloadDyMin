@@ -20,12 +20,14 @@ async function runDouyin(shareUrl) {
   // 1.根据分享的视频地址，通过重定向获取整个html信息
   const { data: html } = await request(shareUrl);
   // 2.截取itemId， dytk 发起二次请求获取uriId
-  console.log('html.match(/(?<=itemId:s")d+(?=")/g)', html.match(/(?<=itemId:\s\")\d+(?=\")/g));
-  const itemId = html.match(/(?<=itemId:\s\")\d+(?=\")/g)[0];
-  const dytk = html.match(/(?<=dytk:\s\")(.*?)(?=\")/g)[0];
+  const itemIdReg = /itemId:\s\"(\d+)\"/g;
+  itemIdReg.test(html);
+  const itemId = RegExp.$1;
+  const dytkReg = /dytk:\s\"(.*?)\"/g;
+  dytkReg.test(html);
+  const dytk = RegExp.$1;
   const long_url = `https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=${itemId}&dytk=${dytk}`;
   const { data: videoJson } = await request(long_url);
-  console.log('%cvideoJson:', 'color: #0e93e0;background: #aaefe5;', videoJson);
 
   // 3.最后通过uri参数来调用视频下载接口
   const uriId = videoJson.item_list[0].video.play_addr.uri;
@@ -34,7 +36,6 @@ async function runDouyin(shareUrl) {
   const coverArr = videoJson.item_list[0].video.cover.url_list;
 
   const res = await request(noWatermarkUrl, 'arraybuffer');
-  console.log('%cres:', 'color: #0e93e0;background: #aaefe5;', res);
   const size = res.headers['content-length'];
   const { data: videoStream } = res;
   return { videoStream, share_title, size, coverArr };

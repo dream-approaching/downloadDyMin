@@ -20,6 +20,7 @@ exports.main = async (event, context) => {
   const { userInfo, updateObj, type } = event;
   console.log('%cupdateObj:', 'color: #0e93e0;background: #aaefe5;', updateObj);
   let { OPENID, UNIONID } = cloud.getWXContext();
+  console.log('%cOPENID, UNIONID:', 'color: #0e93e0;background: #aaefe5;', OPENID, UNIONID);
   // 先查询用户是否存在
   const filterList = await users
     .where({
