@@ -16,6 +16,8 @@ function removeArrIndex(arr, index) {
 }
 
 const _ = db.command;
+// 视频的状态
+const STATUS = { show: 1, hide: 2 };
 exports.main = async (event, context) => {
   const { userInfo, updateObj, type } = event;
   console.log('%cupdateObj:', 'color: #0e93e0;background: #aaefe5;', updateObj);
@@ -71,12 +73,19 @@ exports.main = async (event, context) => {
         let times = 0;
         console.log('%cindex:', 'color: #0e93e0;background: #aaefe5;', index);
         if (index > -1) {
-          // 这个视频已经下载的次数
+          // times: 这个视频已经下载的次数
           times = record.downloadArr[index].downloadTimesMine;
           const newArr = removeArrIndex(record.downloadArr, index);
-          datas.downloadArr = [...newArr, { ...videoRecord.data, downloadTimesMine: times + 1 }];
+          datas.downloadArr = [
+            ...newArr,
+            { ...videoRecord.data, downloadTimesMine: times + 1, status: STATUS.show },
+          ];
         } else {
-          datas.downloadArr = _.push({ ...videoRecord.data, downloadTimesMine: times + 1 });
+          datas.downloadArr = _.push({
+            ...videoRecord.data,
+            downloadTimesMine: times + 1,
+            status: STATUS.show,
+          });
         }
       }
     }
