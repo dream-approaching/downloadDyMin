@@ -20,13 +20,14 @@ const _ = db.command;
 const STATUS = { show: 1, hide: 2 };
 exports.main = async (event, context) => {
   const { userInfo, updateObj, type } = event;
+  console.log('%cuserInfo:', 'color: #0e93e0;background: #aaefe5;', userInfo);
   console.log('%cupdateObj:', 'color: #0e93e0;background: #aaefe5;', updateObj);
   let { OPENID, UNIONID } = cloud.getWXContext();
   console.log('%cOPENID, UNIONID:', 'color: #0e93e0;background: #aaefe5;', OPENID, UNIONID);
   // 先查询用户是否存在
   const filterList = await users
     .where({
-      signature: userInfo.signature,
+      openId: OPENID,
     })
     .get();
   console.log('%cfilterList:', 'color: #0e93e0;background: #aaefe5;', filterList);

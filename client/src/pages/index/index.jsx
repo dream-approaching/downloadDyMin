@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import Taro, { useState, useRef, useEffect, useDidShow } from '@tarojs/taro';
+import Taro, { useState, useRef, useEffect, useDidShow, useShareAppMessage } from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
 import dayjs from 'dayjs';
 // eslint-disable-next-line no-unused-vars
@@ -232,16 +232,17 @@ export default function Index() {
   const [curtainImg, setCurtainImg] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [clipboardText, setClipboardText] = useState('');
+
   useDidShow(async () => {
     console.log('didShow');
-
     // 获取剪切板内容
     try {
       const clipboard = await Taro.getClipboardData();
-      console.log('%cclipboard:', 'color: #0e93e0;background: #aaefe5;', clipboard);
       if (clipboard.data.indexOf('https://v.douyin.com') > -1) {
-        setModalOpen(true);
-        setClipboardText(clipboard.data);
+        await setClipboardText(clipboard.data);
+        setTimeout(() => {
+          setModalOpen(true);
+        }, 500);
       }
     } catch (error) {
       console.log('error 227', error);
@@ -258,9 +259,27 @@ export default function Index() {
     }
   });
 
-  const clearClipboard = () => Taro.setClipboardData({ data: '', success: wx.hideToast });
+  useShareAppMessage(res => {
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      console.log(res.target);
+    }
+    return {
+      title: '无水印下载douyin',
+      path: 'pages/index/index'
+    };
+  });
+
+  const clearClipboard = () =>
+    Taro.setClipboardData({
+      data: ' ',
+      success: wx.hideToast,
+      fail: err => console.log('err276', err)
+    });
 
   console.log('%cprogress:', 'color: #0e93e0;background: #aaefe5;', progress);
+  console.log('modalOpen', modalOpen && !showCurtain);
+  console.log('%csetClipboardText:', 'color: #0e93e0;background: #aaefe5;', clipboardText);
   const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
   const tipArr = [
     { id: 1, title: '打开抖音，选择需要去水印的视频', pic: step1 },
