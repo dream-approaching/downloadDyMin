@@ -12,7 +12,7 @@ import './app.less';
 
 class App extends Component {
   config = {
-    pages: ['pages/index/index', 'pages/mine/index'],
+    pages: ['pages/mine/index', 'pages/index/index'],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
