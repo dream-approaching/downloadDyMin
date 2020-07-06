@@ -50,8 +50,45 @@ page {
   font-size: 30px;
 }
 
-.separate {
-  background: #e0e3da;
-  width: 100%;
-  height: 6px;
+.loginBtn {
+  width: 90%;
+  font-size: 30px;
+  margin-top: 100px;
+}
+.itemCon {
+  margin: 15px 0;
+  .itemContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    .avatar {
+      width: 100%;
+      height: 450px;
+      display: block;
+      flex: 1;
+      margin-right: 15px;
+    }
+    .rightContent {
+      flex: 1;
+      margin-left: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      .title {
+        text-align: justify;
+      }
+      .btn {
+        height: 60px;
+        margin-top: 30px;
+        line-height: 60px;
+        font-size: 28px;
+      }
+      .time {
+        display: flex;
+        align-self: flex-end;
+        font-size: 22px;
+        color: #666;
+      }
+    }
+  }
 }

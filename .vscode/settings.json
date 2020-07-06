@@ -3,5 +3,19 @@
   "typescript.preferences.quoteStyle": "single",
   "prettier.jsxSingleQuote": true,
   "prettier.singleQuote": true,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "html",
+    "vue",
+    "markdown"
+  ],
+  "typescript.format.enable": false,
+  "typescript.reportStyleChecksAsWarnings": false,
+  "typescript.suggestionActions.enabled": false,
+  "typescript.surveys.enabled": false,
+  "typescript.tsc.autoDetect": "off",
+  "typescript.validate.enable": false
 }

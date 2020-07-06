@@ -1,8 +1,6 @@
-/* eslint-disable no-undef */
 import Taro, { useState, useRef, useEffect, useDidShow, useShareAppMessage } from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
 import dayjs from 'dayjs';
-// eslint-disable-next-line no-unused-vars
 import {
   AtTextarea,
   AtButton,
@@ -39,7 +37,6 @@ export default function Index() {
   const [progressStatus, setProgressStatus] = useState('progress');
   const [downloadTask, setdownloadTask] = useState(null);
   const downloadTaskRef = useRef();
-
   const handleChange = values => {
     setValue(values);
     // 在小程序中，如果想改变 value 的值，需要 `return value` 从而改变输入框的当前值
@@ -48,18 +45,19 @@ export default function Index() {
 
   let retryTimes = 0;
   let waitFileIdInterval = null;
-  const handleDownload = async () => {
+  const handleDownload = async ({ urlFromMine }) => {
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
       const userInfo = await Taro.getUserInfo();
-
+      Taro.setStorage({ key: 'userInfo', data: userInfo });
       setProgressStatus('progress');
       if (downloadTask) {
         return MyToast('正在下载，请稍候...');
       }
       const index1 = value.indexOf('http');
       const index2 = value.indexOf('复制');
-      const url = value.slice(index1, index2 - 1);
+      console.log('%cvalue:', 'color: #0e93e0;background: #aaefe5;', value);
+      const url = urlFromMine || value.slice(index1, index2 - 1);
       console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
       if (url.indexOf('douyin') <= -1 || url.indexOf('http') <= -1) {
         return MyToast('请检查复制的链接是否正确');
@@ -215,6 +213,12 @@ export default function Index() {
     downloadTask.abort();
     setdownloadTask(null);
     setProgress(null);
+    setProgressStatus('error');
+    Taro.atMessage({
+      message: '取消下载',
+      type: 'error'
+    });
+    setAnalyzing(false);
   };
 
   useEffect(() => {
@@ -235,6 +239,13 @@ export default function Index() {
 
   useDidShow(async () => {
     console.log('didShow');
+    const urlFromMine = Taro.getStorageSync('urlFromMine');
+    console.log('%curlFromMine:', 'color: #0e93e0;background: #aaefe5;', urlFromMine);
+    if (urlFromMine) {
+      Taro.removeStorage({ key: 'urlFromMine' });
+      await handleChange(urlFromMine);
+      await handleDownload({ urlFromMine });
+    }
     // 获取剪切板内容
     try {
       const clipboard = await Taro.getClipboardData();
@@ -278,8 +289,6 @@ export default function Index() {
     });
 
   console.log('%cprogress:', 'color: #0e93e0;background: #aaefe5;', progress);
-  console.log('modalOpen', modalOpen && !showCurtain);
-  console.log('%csetClipboardText:', 'color: #0e93e0;background: #aaefe5;', clipboardText);
   const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
   const tipArr = [
     { id: 1, title: '打开抖音，选择需要去水印的视频', pic: step1 },
