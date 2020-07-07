@@ -15,7 +15,8 @@ export default function Mine() {
 
   const [pageLoading, setPageLoading] = useState(true);
   const [downloadList, setdownloadList] = useState([]);
-  useDidShow(async () => {
+
+  const initialFn = async () => {
     // Taro.startPullDownRefresh();
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
@@ -28,13 +29,16 @@ export default function Mine() {
         });
         Taro.hideNavigationBarLoading();
         await setPageLoading(false);
-        setdownloadList(res.result);
+        setdownloadList(res.result.reverse());
       } catch (error) {
         await setPageLoading(false);
         Taro.hideNavigationBarLoading();
         console.log('error 27', error);
       }
     }
+  };
+  useDidShow(async () => {
+    await initialFn();
   });
 
   useShareAppMessage(res => {
@@ -58,16 +62,18 @@ export default function Mine() {
     Taro.switchTab({ url: `/pages/index/index` });
   };
 
-  // 倒序
-  if (downloadList.length) {
-    downloadList.reverse();
-  }
+  // 授权回调
+  const authorityCallback = async data => {
+    if (data.detail.userInfo) {
+      await initialFn();
+    }
+  };
 
   return (
     <View className='container'>
       <AtMessage />
       {!userInfo ? (
-        <Button className='loginBtn' openType='getUserInfo'>
+        <Button onGetUserInfo={authorityCallback} className='loginBtn' openType='getUserInfo'>
           授权即可查看下载历史
         </Button>
       ) : (

@@ -228,6 +228,13 @@ export default function Index() {
     setAnalyzing(false);
   };
 
+  // 授权回调
+  const authorityCallback = async data => {
+    if (data.detail.userInfo) {
+      handleDownload({});
+    }
+  };
+
   useEffect(() => {
     downloadTaskRef.current = downloadTask;
   }, [downloadTask]);
@@ -334,6 +341,7 @@ export default function Index() {
       />
       <AtButton
         openType='getUserInfo'
+        onGetUserInfo={authorityCallback}
         loading={isDownloading || analyzing}
         onClick={handleDownload}
         className='btn'
