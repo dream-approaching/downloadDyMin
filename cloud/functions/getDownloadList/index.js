@@ -17,6 +17,6 @@ exports.main = async (event, context) => {
     })
     .get();
   console.log('%cfilterList:', 'color: #0e93e0;background: #aaefe5;', filterList);
-
+  if (!filterList.data.length) return [];
   return filterList.data[0].downloadArr;
 };

@@ -1,6 +1,5 @@
 import Taro, { useState, useRef, useEffect, useDidShow, useShareAppMessage } from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
-import dayjs from 'dayjs';
 import {
   AtTextarea,
   AtButton,
@@ -16,6 +15,12 @@ import step1 from '../../assets/step1.jpg';
 import step2 from '../../assets/step2.jpg';
 import './index.less';
 import MyToast from '../../components/Toast';
+
+function isUrl(path) {
+  /* eslint no-useless-escape:0 */
+  const reg1 = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
+  return reg1.test(path);
+}
 
 const RETRY_TIMES = 5;
 export default function Index() {
@@ -54,10 +59,12 @@ export default function Index() {
       if (downloadTask) {
         return MyToast('正在下载，请稍候...');
       }
-      const index1 = value.indexOf('http');
-      const index2 = value.indexOf('复制');
+      const exactUrl = isUrl(value.trim());
+      const index1 = exactUrl ? 0 : value.indexOf('http');
+      const index2 = exactUrl ? undefined : value.indexOf('复制') - 1;
+
       console.log('%cvalue:', 'color: #0e93e0;background: #aaefe5;', value);
-      const url = urlFromMine || value.slice(index1, index2 - 1);
+      const url = urlFromMine || value.trim().slice(index1, index2);
       console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
       if (url.indexOf('douyin') <= -1 || url.indexOf('http') <= -1) {
         return MyToast('请检查复制的链接是否正确');
@@ -134,12 +141,12 @@ export default function Index() {
                 MyToast('解析错误，正为您重试', 1000);
                 setTimeout(async () => {
                   retryTimes += 1;
-                  handleDownload();
+                  handleDownload({});
                 }, 100);
               }
             } else if (err.errMsg.indexOf('ERR_CONNECTION_ABORTED') > -1) {
               MyToast('网络错误，正为您重试', 1000);
-              handleDownload();
+              handleDownload({});
             } else {
               failFn('下载失败，请重新尝试');
             }
@@ -199,7 +206,7 @@ export default function Index() {
             if (err.errMsg.indexOf('timeout') > -1) {
               MyToast('该视频较大，请耐心等候');
               setTimeout(() => {
-                handleDownload();
+                handleDownload({});
               }, 1000);
             }
             // MyToast(JSON.stringify(err));
@@ -257,16 +264,6 @@ export default function Index() {
       }
     } catch (error) {
       console.log('error 227', error);
-    }
-
-    // 如果已经授权，则更新一下lastLogin
-    const authSettings = await Taro.getSetting();
-    if (authSettings.authSetting['scope.userInfo']) {
-      const userInfo = await Taro.getUserInfo();
-      await wx.cloud.callFunction({
-        name: 'setUsers',
-        data: { userInfo, updateObj: { lastLogin: dayjs().format('YYYY-MM-DD HH:mm:ss') } }
-      });
     }
   });
 
@@ -397,5 +394,5 @@ export default function Index() {
 }
 
 Index.config = {
-  navigationBarTitleText: '首页'
+  navigationBarTitleText: '去水印'
 };

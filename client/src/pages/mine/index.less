@@ -56,12 +56,12 @@ page {
   margin-top: 100px;
 }
 .itemCon {
-  margin: 15px 0;
+  margin: 16px 12px;
   .itemContent {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    .avatar {
+    .cover {
       width: 100%;
       height: 450px;
       display: block;
@@ -77,17 +77,40 @@ page {
       .title {
         text-align: justify;
       }
+
       .btn {
         height: 60px;
         margin-top: 30px;
         line-height: 60px;
         font-size: 28px;
       }
-      .time {
+
+      .timeCon {
         display: flex;
+        flex-direction: column;
         align-self: flex-end;
-        font-size: 22px;
-        color: #666;
+        .authorCon {
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-end;
+          align-items: center;
+          margin-bottom: 10px;
+          .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+          }
+          .nickname {
+            font-size: 28px;
+            line-height: 40px;
+            color: #666;
+          }
+        }
+        .time {
+          font-size: 22px;
+          color: #666;
+        }
       }
     }
   }

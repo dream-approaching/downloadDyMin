@@ -12,7 +12,10 @@ exports.main = async (event) => {
   const { runDouyin } = require('./core');
   const { url, userInfo } = event;
   try {
-    const { videoStream, share_title, size, coverArr } = await runDouyin(url);
+    const { videoStream, share_title, size, coverArr, music, author, createTime } = await runDouyin(
+      url
+    );
+    console.log('%cmusic, author:', 'color: #0e93e0;background: #aaefe5;', music, author);
     let { OPENID, UNIONID } = cloud.getWXContext();
     // 先将部分信息写入videos表中，待视频上传完成后更新
     const addRes = await videos.add({
@@ -25,6 +28,9 @@ exports.main = async (event) => {
         downloadUsers: [],
         uploadUser: { ...userInfo, openId: OPENID, unionId: UNIONID },
         uploadTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        music,
+        author,
+        createTime: dayjs(createTime * 1000).format('YYYY-MM-DD HH:mm:ss'),
       },
     });
     // 上传视频

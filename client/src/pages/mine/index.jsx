@@ -1,4 +1,4 @@
-import Taro, { useDidShow, useShareAppMessage, useTabItemTap, useState } from '@tarojs/taro';
+import Taro, { useDidShow, useShareAppMessage, useState } from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
 // import dayjs from 'dayjs';
 import { AtMessage, AtCard, AtButton } from 'taro-ui';
@@ -7,25 +7,33 @@ import './index.less';
 export default function Mine() {
   const [userInfo, setUserInfo] = useState(Taro.getStorageSync('userInfo'));
   const setUserInfoFn = async () => {
-    const authSettings = await Taro.getSetting();
-    if (authSettings.authSetting['scope.userInfo']) {
-      const user = await Taro.getUserInfo();
-      Taro.setStorage({ key: 'userInfo', data: user });
-      console.log('%cuser:', 'color: #0e93e0;background: #aaefe5;', user);
-      setUserInfo(user);
-    }
+    const user = await Taro.getUserInfo();
+    Taro.setStorage({ key: 'userInfo', data: user });
+    console.log('%cuser:', 'color: #0e93e0;background: #aaefe5;', user);
+    setUserInfo(user);
   };
 
+  const [pageLoading, setPageLoading] = useState(true);
   const [downloadList, setdownloadList] = useState([]);
   useDidShow(async () => {
-    await setUserInfoFn();
-    try {
-      const res = await Taro.cloud.callFunction({
-        name: 'getDownloadList'
-      });
-      setdownloadList(res.result);
-    } catch (error) {
-      console.log('error 27', error);
+    // Taro.startPullDownRefresh();
+    const authSettings = await Taro.getSetting();
+    if (authSettings.authSetting['scope.userInfo']) {
+      Taro.showNavigationBarLoading();
+      await setUserInfoFn();
+      await setPageLoading(true);
+      try {
+        const res = await Taro.cloud.callFunction({
+          name: 'getDownloadList'
+        });
+        Taro.hideNavigationBarLoading();
+        await setPageLoading(false);
+        setdownloadList(res.result);
+      } catch (error) {
+        await setPageLoading(false);
+        Taro.hideNavigationBarLoading();
+        console.log('error 27', error);
+      }
     }
   });
 
@@ -40,9 +48,9 @@ export default function Mine() {
     };
   });
 
-  useTabItemTap(async () => {
-    // await setUserInfoFn();
-  });
+  // useTabItemTap(async () => {
+  //   await setUserInfoFn();
+  // });
 
   const handleClickDownload = async url => {
     console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
@@ -50,47 +58,65 @@ export default function Mine() {
     Taro.switchTab({ url: `/pages/index/index` });
   };
 
+  // 倒序
+  if (downloadList.length) {
+    downloadList.reverse();
+  }
+
   return (
     <View className='container'>
       <AtMessage />
       {!userInfo ? (
         <Button className='loginBtn' openType='getUserInfo'>
-          登录查看下载记录
+          授权即可查看下载历史
         </Button>
       ) : (
         <View>
-          <View className='profile-info'>
+          {/* <View className='profile-info'>
             <Image className='avatar' src={userInfo.userInfo.avatarUrl}></Image>
             <View className='info'>
               <Text className='name'>{userInfo.userInfo.nickName}</Text>
             </View>
-          </View>
+          </View> */}
           <View>
-            {downloadList.map(item => {
-              return (
-                <AtCard
-                  renderIcon={<Button>123</Button>}
-                  key={item._id}
-                  className='itemCon'
-                  extra={`热度：${item.downloadTimes}`}
-                  // note={item.uploadTime}
-                  title={`${item.title.slice(0, 10)}...`}
-                >
-                  <View className='itemContent'>
-                    <Image className='avatar' mode='aspectFit' src={item.coverArr[0]} />
-                    <View className='rightContent'>
-                      <View>
-                        <Text className='title'>{item.title}</Text>
-                        <AtButton onClick={() => handleClickDownload(item.url)} className='btn'>
-                          下载
-                        </AtButton>
+            {!downloadList.length && !pageLoading ? (
+              <AtCard title='暂无历史记录'></AtCard>
+            ) : (
+              downloadList.map(item => {
+                return (
+                  <AtCard
+                    key={item._id}
+                    className='itemCon'
+                    extra={`热度：${item.downloadTimes}`}
+                    // note={item.uploadTime}
+                    title={`${item.title.slice(0, 10)}...`}
+                  >
+                    <View className='itemContent'>
+                      <Image className='cover' mode='aspectFit' src={item.coverArr[0]} />
+                      <View className='rightContent'>
+                        <View>
+                          <Text className='title'>{item.title}</Text>
+                          <AtButton onClick={() => handleClickDownload(item.url)} className='btn'>
+                            下载
+                          </AtButton>
+                        </View>
+                        <View className='timeCon'>
+                          <View className='authorCon'>
+                            <Text className='nickname'>{item.author.nickname}</Text>
+                            <Image
+                              className='avatar'
+                              mode='aspectFit'
+                              src={item.author.avatar_thumb.url_list[0]}
+                            />
+                          </View>
+                          <Text className='time'>{item.uploadTime}</Text>
+                        </View>
                       </View>
-                      <Text className='time'>{item.uploadTime}</Text>
                     </View>
-                  </View>
-                </AtCard>
-              );
-            })}
+                  </AtCard>
+                );
+              })
+            )}
           </View>
         </View>
       )}
@@ -99,5 +125,5 @@ export default function Mine() {
 }
 
 Mine.config = {
-  navigationBarTitleText: '我的'
+  navigationBarTitleText: '下载历史'
 };

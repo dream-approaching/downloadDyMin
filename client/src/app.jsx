@@ -1,5 +1,6 @@
 import Taro, { Component } from '@tarojs/taro';
 import 'taro-ui/dist/style/index.scss';
+import dayjs from 'dayjs';
 import Index from './pages/index';
 
 import './app.less';
@@ -26,13 +27,13 @@ class App extends Component {
       list: [
         {
           pagePath: 'pages/index/index',
-          text: '下载',
+          // text: '下载',
           iconPath: 'assets/download.png',
           selectedIconPath: 'assets/download_a.png'
         },
         {
           pagePath: 'pages/mine/index',
-          text: '我的',
+          // text: '历史',
           iconPath: 'assets/mine.png',
           selectedIconPath: 'assets/mine_a.png'
         }
@@ -40,9 +41,19 @@ class App extends Component {
     }
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     if (process.env.TARO_ENV === 'weapp') {
-      Taro.cloud.init();
+      await Taro.cloud.init();
+
+      // 如果已经授权，则更新一下lastLogin
+      const authSettings = await Taro.getSetting();
+      if (authSettings.authSetting['scope.userInfo']) {
+        const userInfo = await Taro.getUserInfo();
+        await wx.cloud.callFunction({
+          name: 'setUsers',
+          data: { userInfo, updateObj: { lastLogin: dayjs().format('YYYY-MM-DD HH:mm:ss') } }
+        });
+      }
     }
   }
 
