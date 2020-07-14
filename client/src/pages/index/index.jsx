@@ -1,4 +1,11 @@
-import Taro, { useState, useRef, useEffect, useDidShow, useShareAppMessage } from '@tarojs/taro';
+import Taro, {
+  useState,
+  useRef,
+  useEffect,
+  useDidShow,
+  useShareAppMessage,
+  useShareTimeline
+} from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
 import {
   AtTextarea,
@@ -282,6 +289,16 @@ export default function Index() {
     return {
       title: '无水印下载douyin',
       path: 'pages/index/index'
+    };
+  });
+
+  useShareTimeline(res => {
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      console.log(res.target);
+    }
+    return {
+      title: '无水印下载douyin'
     };
   });
 
