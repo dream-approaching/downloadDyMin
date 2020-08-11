@@ -1,5 +1,5 @@
 import Taro, { useDidShow, useShareAppMessage, useState, useShareTimeline } from '@tarojs/taro';
-import { View, Text, Button, Image } from '@tarojs/components';
+import { View, Text, Button, Image, Video } from '@tarojs/components';
 // import dayjs from 'dayjs';
 import { AtMessage, AtCard, AtButton } from 'taro-ui';
 import './index.less';
@@ -21,6 +21,7 @@ export default function Mine() {
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
       Taro.showNavigationBarLoading();
+      Taro.showToast({ title: '努力加载中...', icon: 'loading' });
       await setUserInfoFn();
       await setPageLoading(true);
       try {
@@ -28,11 +29,13 @@ export default function Mine() {
           name: 'getDownloadList'
         });
         Taro.hideNavigationBarLoading();
+        Taro.hideToast();
         await setPageLoading(false);
         setdownloadList(res.result.reverse());
       } catch (error) {
         await setPageLoading(false);
         Taro.hideNavigationBarLoading();
+        Taro.hideToast();
         console.log('error 27', error);
       }
     }
@@ -79,6 +82,7 @@ export default function Mine() {
     }
   };
 
+  console.log('%cdownloadList:', 'color: #0e93e0;background: #aaefe5;', downloadList);
   return (
     <View className='container'>
       <AtMessage />
@@ -108,7 +112,16 @@ export default function Mine() {
                     title={`${item.title.slice(0, 10)}...`}
                   >
                     <View className='itemContent'>
-                      <Image className='cover' mode='aspectFit' src={item.coverArr[0]} />
+                      <Video
+                        src={item.fileId}
+                        controls
+                        autoplay={false}
+                        initialTime='0'
+                        loop={false}
+                        muted={false}
+                        className='cover'
+                      />
+                      {/* <Image className='cover' mode='aspectFit' src={item.coverArr[0]} /> */}
                       <View className='rightContent'>
                         <View>
                           <Text className='title'>{item.title}</Text>
