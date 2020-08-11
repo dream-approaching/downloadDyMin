@@ -1,4 +1,4 @@
-import Taro, { useDidShow, useShareAppMessage, useState } from '@tarojs/taro';
+import Taro, { useDidShow, useShareAppMessage, useState, useShareTimeline } from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
 // import dayjs from 'dayjs';
 import { AtMessage, AtCard, AtButton } from 'taro-ui';
@@ -49,6 +49,16 @@ export default function Mine() {
     return {
       title: '无水印下载douyin',
       path: 'pages/index/index'
+    };
+  });
+
+  useShareTimeline(res => {
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      console.log(res.target);
+    }
+    return {
+      title: '无水印下载douyin'
     };
   });
 

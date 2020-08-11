@@ -58,6 +58,7 @@ export default function Index() {
   let retryTimes = 0;
   let waitFileIdInterval = null;
   const handleDownload = async ({ urlFromMine }) => {
+    console.log('执行了handleDownload');
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
       const userInfo = await Taro.getUserInfo();
@@ -70,7 +71,6 @@ export default function Index() {
       const index1 = exactUrl ? 0 : value.indexOf('http');
       const index2 = exactUrl ? undefined : value.indexOf('复制') - 1;
 
-      console.log('%cvalue:', 'color: #0e93e0;background: #aaefe5;', value);
       const url = urlFromMine || value.trim().slice(index1, index2);
       console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
       if (url.indexOf('douyin') <= -1 || url.indexOf('http') <= -1) {
@@ -115,19 +115,29 @@ export default function Index() {
               // setProgress(null);
 
               // 调用云函数接口 下载次数加一
-              await wx.cloud.callFunction({
-                name: 'recordDownload',
-                data: { databaseId, userInfo }
-              });
+              try {
+                await wx.cloud.callFunction({
+                  name: 'recordDownload',
+                  data: { databaseId, userInfo }
+                });
+              } catch (error) {
+                console.log('%cerror124:', 'color: #0e93e0;background: #aaefe5;', error);
+              }
+
               // 调用云函数接口 用户增加下载次数
-              await wx.cloud.callFunction({
-                name: 'setUsers',
-                data: {
-                  userInfo,
-                  type: 'download',
-                  videoId: databaseId
-                }
-              });
+              try {
+                await wx.cloud.callFunction({
+                  name: 'setUsers',
+                  data: {
+                    userInfo,
+                    type: 'download',
+                    videoId: databaseId
+                  }
+                });
+              } catch (error) {
+                console.log('%cerror138:', 'color: #0e93e0;background: #aaefe5;', error);
+              }
+
               // 保存到相册
               Taro.saveVideoToPhotosAlbum({
                 filePath: res.tempFilePath,
@@ -176,7 +186,7 @@ export default function Index() {
       });
       console.log('%ccheckHasVideo:', 'color: #0e93e0;background: #aaefe5;', checkHasVideo);
       if (checkHasVideo.result.length > 0) {
-        const video = checkHasVideo.result[0];
+        let video = checkHasVideo.result[0];
         console.log('%cvideo:', 'color: #0e93e0;background: #aaefe5;', video);
         // 没有fileId表示视频还未上传完成，再次轮询
         if (!video.fileId) {
@@ -188,6 +198,7 @@ export default function Index() {
             });
             console.log('%cagainCheck:', 'color: #0e93e0;background: #aaefe5;', againCheck);
             if (againCheck.result[0].fileId) {
+              video = againCheck.result[0].fileId;
               clearInterval(waitFileIdInterval);
               downloadFn(video.fileId, video._id);
             }
@@ -196,22 +207,32 @@ export default function Index() {
           downloadFn(video.fileId, video._id);
         }
       } else {
+        console.log('checkHasVideo.result.length <=0', checkHasVideo.result.length <= 0);
         wx.cloud.callFunction({
           name: 'uploadVideo',
           data: { url, userInfo },
           success: uploadRes => {
             console.log('res 144', uploadRes); // 3
+            console.log(
+              '%cuploadRes.result:',
+              'color: #0e93e0;background: #aaefe5;',
+              uploadRes.result.name
+            );
             if (uploadRes.result.name === 'Error') {
               console.log('uploadRes.result.message', uploadRes.result.message);
               return failFn(uploadRes.result.message);
             }
-            downloadFn(uploadRes.result.fileID, uploadRes.result.databaseId);
+            if (uploadRes.result.fileID) {
+              downloadFn(uploadRes.result.fileID, uploadRes.result.databaseId);
+            } else {
+              handleDownload({});
+            }
           },
           fail: err => {
             console.log('err 167', err);
             // 20s超时，但视频会继续上传，2s后重试
             if (err.errMsg.indexOf('timeout') > -1) {
-              MyToast('该视频较大，请耐心等候');
+              MyToast('解析超时，正在重试');
               setTimeout(() => {
                 handleDownload({});
               }, 1000);
@@ -309,7 +330,6 @@ export default function Index() {
       fail: err => console.log('err276', err)
     });
 
-  console.log('%cprogress:', 'color: #0e93e0;background: #aaefe5;', progress);
   const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
   const tipArr = [
     { id: 1, title: '打开抖音，选择需要去水印的视频', pic: step1 },
@@ -360,7 +380,7 @@ export default function Index() {
         openType='getUserInfo'
         onGetUserInfo={authorityCallback}
         loading={isDownloading || analyzing}
-        onClick={handleDownload}
+        // onClick={handleDownload}
         className='btn'
         type='primary'
       >

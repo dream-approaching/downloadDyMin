@@ -16,7 +16,7 @@ exports.main = async (event) => {
       url
     );
     console.log('%cmusic, author:', 'color: #0e93e0;background: #aaefe5;', music, author);
-    let { OPENID, UNIONID } = cloud.getWXContext();
+    let { OPENID, UNIONID } = await cloud.getWXContext();
     // 先将部分信息写入videos表中，待视频上传完成后更新
     const addRes = await videos.add({
       data: {
@@ -47,14 +47,18 @@ exports.main = async (event) => {
       },
     });
     // 调用云函数 更新用户信息
-    await cloud.callFunction({
-      name: 'setUsers',
-      data: {
-        userInfo,
-        type: 'upload',
-        videoId: addRes._id,
-      },
-    });
+    try {
+      await cloud.callFunction({
+        name: 'setUsers',
+        data: {
+          userInfo,
+          type: 'upload',
+          videoId: addRes._id,
+        },
+      });
+    } catch (error) {
+      console.log('%cerror60:', 'color: #0e93e0;background: #aaefe5;', error);
+    }
     console.log('%cres2:', 'color: #0e93e0;background: #aaefe5;', res);
     console.log('%caddRes2:', 'color: #0e93e0;background: #aaefe5;', addRes);
     return { ...res, databaseId: addRes._id };
