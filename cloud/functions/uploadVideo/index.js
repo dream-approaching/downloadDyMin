@@ -51,7 +51,7 @@ exports.main = async (event) => {
       await cloud.callFunction({
         name: 'setUsers',
         data: {
-          userInfo,
+          userInfo: { ...userInfo, openId: OPENID, unionId: UNIONID },
           type: 'upload',
           videoId: addRes._id,
         },

@@ -27,7 +27,7 @@ exports.main = async (event, context) => {
   // 先查询用户是否存在
   const filterList = await users
     .where({
-      openId: OPENID,
+      openId: OPENID || userInfo.openId,
     })
     .get();
   console.log('%cfilterList:', 'color: #0e93e0;background: #aaefe5;', filterList);
