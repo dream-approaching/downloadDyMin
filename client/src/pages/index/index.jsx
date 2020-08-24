@@ -44,15 +44,15 @@ export default function Index() {
   const [progressStatus, setProgressStatus] = useState('progress');
   const [downloadTask, setdownloadTask] = useState(null);
   const downloadTaskRef = useRef();
-  const handleChange = values => {
-    setValue(values);
+  const handleChange = async values => {
+    await setValue(values);
     // 在小程序中，如果想改变 value 的值，需要 `return value` 从而改变输入框的当前值
     return values;
   };
 
   let retryTimes = 0;
   let waitFileIdInterval = null;
-  const handleDownload = async () => {
+  const handleDownload = async ({ urlFromMine }) => {
     console.log('执行了handleDownload');
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
@@ -63,7 +63,7 @@ export default function Index() {
         return MyToast('正在下载，请稍候...');
       }
       const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-)+)/g;
-      const urlArr = value.trim().match(reg);
+      const urlArr = urlFromMine ? [urlFromMine] : value.trim().match(reg);
       if (!urlArr) {
         return MyToast('请检查复制的链接是否正确');
       }

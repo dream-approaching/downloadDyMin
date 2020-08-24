@@ -20,8 +20,8 @@ const _ = db.command;
 const STATUS = { show: 1, hide: 2 };
 exports.main = async (event, context) => {
   const { userInfo, updateObj, type } = event;
+  console.log('%ctype:', 'color: #0e93e0;background: #aaefe5;', type);
   console.log('%cuserInfo:', 'color: #0e93e0;background: #aaefe5;', userInfo);
-  console.log('%cupdateObj:', 'color: #0e93e0;background: #aaefe5;', updateObj);
   let { OPENID, UNIONID } = await cloud.getWXContext();
   console.log('%cOPENID, UNIONID:', 'color: #0e93e0;background: #aaefe5;', OPENID, UNIONID);
   // 先查询用户是否存在

@@ -48,6 +48,7 @@ exports.main = async (event) => {
     });
     // 调用云函数 更新用户信息
     try {
+      console.log('调用云函数 更新用户信息');
       await cloud.callFunction({
         name: 'setUsers',
         data: {
