@@ -38,7 +38,7 @@ exports.main = async (event, context) => {
       cloudID: userInfo.cloudID,
       encryptedData: userInfo.encryptedData,
       signature: userInfo.signature,
-      rawData: userInfo.rawData,
+      // rawData: userInfo.rawData,
       openId: OPENID,
       unionId: UNIONID,
       createTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -66,7 +66,13 @@ exports.main = async (event, context) => {
       console.log('%cvideoRecord:', 'color: #0e93e0;background: #aaefe5;', videoRecord);
       if (type === 'upload') {
         datas.uploadTimes = _.inc(1);
-        datas.uploadArr = _.push(videoRecord.data);
+        datas.uploadArr = _.push({
+          _id: videoRecord.data._id,
+          coverArr: [videoRecord.data.coverArr[0]],
+          fileId: videoRecord.data.fileId,
+          title: videoRecord.data.title,
+          status: STATUS.show,
+        });
       } else {
         datas.downloadTimes = _.inc(1);
         // 判断下载的视频是否已经存在
@@ -83,7 +89,10 @@ exports.main = async (event, context) => {
           ];
         } else {
           datas.downloadArr = _.push({
-            ...videoRecord.data,
+            _id: videoRecord.data._id,
+            coverArr: [videoRecord.data.coverArr[0]],
+            fileId: videoRecord.data.fileId,
+            title: videoRecord.data.title,
             downloadTimesMine: times + 1,
             status: STATUS.show,
           });
