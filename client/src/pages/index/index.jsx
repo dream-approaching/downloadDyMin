@@ -5,8 +5,7 @@ import Taro, {
   useEffect,
   useDidShow,
   useShareAppMessage,
-  useShareTimeline,
-  useReady,
+  useShareTimeline
 } from '@tarojs/taro';
 import { View, Text, Button, Image } from '@tarojs/components';
 import {
@@ -18,18 +17,12 @@ import {
   AtModalContent,
   AtModalAction,
   AtList,
-  AtListItem,
+  AtListItem
 } from 'taro-ui';
 import step1 from '../../assets/step1.jpg';
 import step2 from '../../assets/step2.jpg';
 import './index.less';
 import MyToast from '../../components/Toast';
-
-function isUrl(path) {
-  /* eslint no-useless-escape:0 */
-  const reg1 = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
-  return reg1.test(path);
-}
 
 const RETRY_TIMES = 5;
 export default function Index() {
@@ -51,7 +44,7 @@ export default function Index() {
   const [progressStatus, setProgressStatus] = useState('progress');
   const [downloadTask, setdownloadTask] = useState(null);
   const downloadTaskRef = useRef();
-  const handleChange = (values) => {
+  const handleChange = values => {
     setValue(values);
     // 在小程序中，如果想改变 value 的值，需要 `return value` 从而改变输入框的当前值
     return values;
@@ -59,7 +52,7 @@ export default function Index() {
 
   let retryTimes = 0;
   let waitFileIdInterval = null;
-  const handleDownload = async ({ urlFromMine }) => {
+  const handleDownload = async () => {
     console.log('执行了handleDownload');
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
@@ -69,21 +62,19 @@ export default function Index() {
       if (downloadTask) {
         return MyToast('正在下载，请稍候...');
       }
-      const exactUrl = isUrl(value.trim());
-      const index1 = exactUrl ? 0 : value.indexOf('http');
-      const index2 = exactUrl ? undefined : value.indexOf('复制') - 1;
-
-      const url = urlFromMine || value.trim().slice(index1, index2);
-      console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
-      if (url.indexOf('douyin') <= -1 || url.indexOf('http') <= -1) {
+      const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-)+)/g;
+      const urlArr = value.trim().match(reg);
+      if (!urlArr) {
         return MyToast('请检查复制的链接是否正确');
       }
+      const url = urlArr[0];
+      console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
       await setAnalyzing(true);
-      const failFn = (text) => {
+      const failFn = text => {
         setProgressStatus('error');
         Taro.atMessage({
           message: text || '下载失败',
-          type: 'error',
+          type: 'error'
         });
         // setProgress(null);
         setAnalyzing(false);
@@ -96,7 +87,7 @@ export default function Index() {
       const downloadFn = async (fileID, databaseId) => {
         const task = wx.cloud.downloadFile({
           fileID,
-          success: async (res) => {
+          success: async res => {
             console.log('%cdownloadFile res:', 'color: #0e93e0;background: #aaefe5;', res);
             console.log('%cdatabaseId:', 'color: #0e93e0;background: #aaefe5;', databaseId);
             retryTimes = 0;
@@ -112,7 +103,7 @@ export default function Index() {
               setProgressStatus('success');
               Taro.atMessage({
                 message: '下载成功',
-                type: 'success',
+                type: 'success'
               });
               // setProgress(null);
 
@@ -120,7 +111,7 @@ export default function Index() {
               try {
                 await wx.cloud.callFunction({
                   name: 'recordDownload',
-                  data: { databaseId, userInfo },
+                  data: { databaseId, userInfo }
                 });
               } catch (error) {
                 console.log('%cerror124:', 'color: #0e93e0;background: #aaefe5;', error);
@@ -133,8 +124,8 @@ export default function Index() {
                   data: {
                     userInfo,
                     type: 'download',
-                    videoId: databaseId,
-                  },
+                    videoId: databaseId
+                  }
                 });
               } catch (error) {
                 console.log('%cerror138:', 'color: #0e93e0;background: #aaefe5;', error);
@@ -145,11 +136,11 @@ export default function Index() {
                 filePath: res.tempFilePath,
                 success(res2) {
                   console.log(res2.errMsg);
-                },
+                }
               });
             }
           },
-          fail: (err) => {
+          fail: err => {
             console.log('%cerr116:', 'color: #0e93e0;background: #aaefe5;', err);
             if (err.errMsg.indexOf('parameter.fileID should be string') > -1) {
               console.log('%cretryTimes:', 'color: #0e93e0;background: #aaefe5;', retryTimes);
@@ -169,22 +160,22 @@ export default function Index() {
             } else {
               failFn('下载失败，请重新尝试');
             }
-          },
+          }
         });
         setdownloadTask(task);
-        task.onProgressUpdate(async (res) => {
+        task.onProgressUpdate(async res => {
           setAnalyzing(false);
           setProgress({
             percent: res.progress,
             totalNeed: (res.totalBytesExpectedToWrite / 1024 / 1024).toFixed(2),
-            currentDownload: (res.totalBytesWritten / 1024 / 1024).toFixed(2),
+            currentDownload: (res.totalBytesWritten / 1024 / 1024).toFixed(2)
           });
         });
       };
       // 检查是否已经上传过
       const checkHasVideo = await wx.cloud.callFunction({
         name: 'checkHasVideo',
-        data: { url },
+        data: { url }
       });
       console.log('%ccheckHasVideo:', 'color: #0e93e0;background: #aaefe5;', checkHasVideo);
       if (checkHasVideo.result.length > 0) {
@@ -196,7 +187,7 @@ export default function Index() {
           waitFileIdInterval = setInterval(async () => {
             const againCheck = await wx.cloud.callFunction({
               name: 'checkHasVideo',
-              data: { url },
+              data: { url }
             });
             console.log('%cagainCheck:', 'color: #0e93e0;background: #aaefe5;', againCheck);
             if (againCheck.result[0].fileId) {
@@ -213,7 +204,7 @@ export default function Index() {
         wx.cloud.callFunction({
           name: 'uploadVideo',
           data: { url, userInfo },
-          success: (uploadRes) => {
+          success: uploadRes => {
             console.log('res 144', uploadRes); // 3
             console.log(
               '%cuploadRes.result:',
@@ -230,7 +221,7 @@ export default function Index() {
               handleDownload({});
             }
           },
-          fail: (err) => {
+          fail: err => {
             console.log('err 167', err);
             // 20s超时，但视频会继续上传，2s后重试
             if (err.errMsg.indexOf('timeout') > -1) {
@@ -240,7 +231,7 @@ export default function Index() {
               }, 1000);
             }
             // MyToast(JSON.stringify(err));
-          },
+          }
         });
       }
     }
@@ -253,13 +244,13 @@ export default function Index() {
     setProgressStatus('error');
     Taro.atMessage({
       message: '取消下载',
-      type: 'error',
+      type: 'error'
     });
     setAnalyzing(false);
   };
 
   // 授权回调
-  const authorityCallback = async (data) => {
+  const authorityCallback = async data => {
     if (data.detail.userInfo) {
       handleDownload({});
     }
@@ -304,49 +295,24 @@ export default function Index() {
     }
   });
 
-  useReady(() => {
-    // 检查更新
-    const updateManager = Taro.getUpdateManager();
-    updateManager.onCheckForUpdate(function (res) {
-      // 请求完新版本信息的回调
-      console.log('%cres311:', 'color: #0e93e0;background: #aaefe5;', res);
-    });
-    updateManager.onUpdateReady(function () {
-      Taro.showModal({
-        title: '更新提示',
-        content: '新版本已经准备好，是否重启应用？',
-        success: function (res) {
-          if (res.confirm) {
-            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-            updateManager.applyUpdate();
-          }
-        },
-      });
-    });
-    updateManager.onUpdateFailed(function (res) {
-      console.log('%cres326:', 'color: #0e93e0;background: #aaefe5;', res);
-      // 新的版本下载失败
-    });
-  });
-
-  useShareAppMessage((res) => {
+  useShareAppMessage(res => {
     if (res.from === 'button') {
       // 来自页面内转发按钮
       console.log(res.target);
     }
     return {
       title: '无水印下载douyin',
-      path: 'pages/index/index',
+      path: 'pages/index/index'
     };
   });
 
-  useShareTimeline((res) => {
+  useShareTimeline(res => {
     if (res.from === 'button') {
       // 来自页面内转发按钮
       console.log(res.target);
     }
     return {
-      title: '无水印下载douyin',
+      title: '无水印下载douyin'
     };
   });
 
@@ -354,7 +320,7 @@ export default function Index() {
     Taro.setClipboardData({
       data: ' ',
       success: wx.hideToast,
-      fail: (err) => console.log('err276', err),
+      fail: err => console.log('err276', err)
     });
 
   const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
@@ -362,7 +328,7 @@ export default function Index() {
     { id: 1, title: '打开抖音，选择需要去水印的视频', pic: step1 },
     { id: 2, title: '点击分享按钮，选择复制链接', pic: step2 },
     { id: 3, title: '打开小程序，自动识别链接(若识别失败请手动粘贴)' },
-    { id: 4, title: '点击下载' },
+    { id: 4, title: '点击下载' }
   ];
   return (
     <View className='index'>
@@ -371,7 +337,7 @@ export default function Index() {
         <Text>说明</Text>
       </View>
       <AtList hasBorder={false} className='list'>
-        {tipArr.map((item) => {
+        {tipArr.map(item => {
           return (
             <AtListItem
               key={item.id}
@@ -427,6 +393,10 @@ export default function Index() {
           取消下载
         </AtButton>
       )}
+      <View className='versionInfo'>
+        <Text>当前版本：</Text>
+        <Text>v1.3.1</Text>
+      </View>
       <AtModal isOpened={modalOpen && !showCurtain}>
         <AtModalContent>检测到链接：{clipboardText} 是否填入？</AtModalContent>
         <AtModalAction>
@@ -466,5 +436,5 @@ export default function Index() {
 }
 
 Index.config = {
-  navigationBarTitleText: '去水印',
+  navigationBarTitleText: '去水印'
 };
