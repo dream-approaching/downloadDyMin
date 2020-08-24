@@ -34,7 +34,7 @@ exports.main = async (event) => {
       },
     });
     // 上传视频
-    const videoName = `${OPENID}_${dayjs().format('YYYYMMDDHHmmss')}`;
+    const videoName = `${dayjs().format('YYYYMMDDHHmmss')}_${OPENID}`;
     const res = await cloud.uploadFile({
       cloudPath: `${videoName}.mp4`,
       fileContent: videoStream,

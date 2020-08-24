@@ -93,6 +93,15 @@ exports.main = async (event, context) => {
             coverArr: [videoRecord.data.coverArr[0]],
             fileId: videoRecord.data.fileId,
             title: videoRecord.data.title,
+            url: videoRecord.data.url,
+            downloadTimes: videoRecord.data.downloadTimes,
+            uploadTime: videoRecord.data.uploadTime,
+            author: {
+              nickname: videoRecord.data.author.nickname,
+              avatar_thumb: {
+                url_list: [videoRecord.data.author.avatar_thumb.url_list[0]],
+              },
+            },
             downloadTimesMine: times + 1,
             status: STATUS.show,
           });
