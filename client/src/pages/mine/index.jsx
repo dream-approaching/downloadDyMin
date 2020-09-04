@@ -1,4 +1,10 @@
-import Taro, { useDidShow, useShareAppMessage, useState, useShareTimeline } from '@tarojs/taro';
+import Taro, {
+  useDidShow,
+  useShareAppMessage,
+  useState,
+  useShareTimeline,
+  usePullDownRefresh
+} from '@tarojs/taro';
 import { View, Text, Button, Image, Video } from '@tarojs/components';
 // import dayjs from 'dayjs';
 import { AtMessage, AtCard, AtButton } from 'taro-ui';
@@ -41,6 +47,12 @@ export default function Mine() {
     }
   };
   useDidShow(async () => {
+    await initialFn();
+  });
+
+  // 下拉刷新
+  usePullDownRefresh(async () => {
+    wx.stopPullDownRefresh();
     await initialFn();
   });
 
@@ -154,5 +166,7 @@ export default function Mine() {
 }
 
 Mine.config = {
-  navigationBarTitleText: '下载历史'
+  navigationBarTitleText: '下载历史',
+  enablePullDownRefresh: true,
+  backgroundTextStyle: 'dark'
 };

@@ -21,6 +21,7 @@ import {
 } from 'taro-ui';
 import step1 from '../../assets/step1.jpg';
 import step2 from '../../assets/step2.jpg';
+import likeImg from '../../assets/like2.png';
 import './index.less';
 import MyToast from '../../components/Toast';
 
@@ -355,6 +356,24 @@ export default function Index() {
           );
         })}
       </AtList>
+      {/* <Image
+        showMenuByLongpress
+        style='width: 300px;height: 300px;background: #fff;'
+        src='cloud://develop-longzi.6465-develop-longzi-1302443537/image/like.jpg'
+        // src='http://storage.jd.com/taro-resource/cases/image5.png'
+      /> */}
+      <AtButton
+        onClick={() => {
+          wx.scanCode({
+            success: res => console.log('res', res),
+            fail: err => console.log('err', err)
+          });
+        }}
+        size='small'
+        className='cancelBtn'
+      >
+        扫码
+      </AtButton>
       <AtTextarea
         name='value'
         type='text'
