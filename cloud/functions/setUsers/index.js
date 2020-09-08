@@ -66,13 +66,6 @@ exports.main = async (event, context) => {
       console.log('%cvideoRecord:', 'color: #0e93e0;background: #aaefe5;', videoRecord);
       if (type === 'upload') {
         datas.uploadTimes = _.inc(1);
-        datas.uploadArr = _.push({
-          _id: videoRecord.data._id,
-          coverArr: [videoRecord.data.coverArr[0]],
-          fileId: videoRecord.data.fileId,
-          title: videoRecord.data.title,
-          status: STATUS.show,
-        });
       } else {
         datas.downloadTimes = _.inc(1);
         // 判断下载的视频是否已经存在
@@ -105,6 +98,11 @@ exports.main = async (event, context) => {
             downloadTimesMine: times + 1,
             status: STATUS.show,
           });
+        }
+        // 只保留最近50条
+        if (datas.downloadArr.length >= 50) {
+          const only50 = datas.downloadArr.slice(0, 50);
+          datas.downloadArr = only50;
         }
       }
     }

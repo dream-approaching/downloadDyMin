@@ -395,7 +395,7 @@ export default function Index() {
       )}
       <View className='versionInfo'>
         <Text>当前版本：</Text>
-        <Text>v1.3.1</Text>
+        <Text>v1.3.2</Text>
       </View>
       <AtModal isOpened={modalOpen && !showCurtain}>
         <AtModalContent>检测到链接：{clipboardText} 是否填入？</AtModalContent>

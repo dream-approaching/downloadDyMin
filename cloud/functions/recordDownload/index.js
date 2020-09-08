@@ -10,13 +10,14 @@ const _ = db.command;
 exports.main = async (event, context) => {
   const { databaseId, userInfo } = event;
   const recordRes = await videos.doc(databaseId).get();
+  let { OPENID } = await cloud.getWXContext();
   const currentUsers = recordRes.data.downloadUsers;
-  const userIsInRecord = currentUsers.some((item) => item.openId === userInfo.openId);
+  const userIsInRecord = currentUsers.some((item) => item.openId === OPENID);
   const updateObj = {
     downloadTimes: _.inc(1),
   };
   if (!userIsInRecord) {
-    updateObj.downloadUsers = [...currentUsers, userInfo];
+    updateObj.downloadUsers = [...currentUsers, { ...userInfo, openId: OPENID }];
   }
   const res = await videos.doc(databaseId).update({
     data: updateObj,
