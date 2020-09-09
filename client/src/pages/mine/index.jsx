@@ -126,49 +126,54 @@ export default function Mine() {
             {!downloadList.length && !pageLoading ? (
               <AtCard title='暂无历史记录'></AtCard>
             ) : (
-              downloadList.map(item => {
-                return (
-                  <AtCard
-                    key={item._id}
-                    className='itemCon'
-                    extra={`热度：${item.downloadTimes}`}
-                    // note={item.uploadTime}
-                    title={`${item.title.slice(0, 10)}...`}
-                  >
-                    <View className='itemContent'>
-                      <Video
-                        src={item.fileId}
-                        controls
-                        autoplay={false}
-                        initialTime='0'
-                        loop={false}
-                        muted={false}
-                        className='cover'
-                      />
-                      {/* <Image className='cover' mode='aspectFit' src={item.coverArr[0]} /> */}
-                      <View className='rightContent'>
-                        <View>
-                          <Text className='title'>{item.title}</Text>
-                          <AtButton onClick={() => handleClickDownload(item.url)} className='btn'>
-                            下载
-                          </AtButton>
-                        </View>
-                        <View className='timeCon'>
-                          <View className='authorCon'>
-                            <Text className='nickname'>{item.author.nickname}</Text>
-                            <Image
-                              className='avatar'
-                              mode='aspectFit'
-                              src={item.author.avatar_thumb.url_list[0]}
-                            />
+              <View>
+                <View className='tipCon'>
+                  <Text className='tip'>保留最近50条历史数据</Text>
+                </View>
+                {downloadList.map(item => {
+                  return (
+                    <AtCard
+                      key={item._id}
+                      className='itemCon'
+                      extra={`热度：${item.downloadTimes}`}
+                      // note={item.uploadTime}
+                      title={`${item.title.slice(0, 10)}...`}
+                    >
+                      <View className='itemContent'>
+                        <Video
+                          src={item.fileId}
+                          controls
+                          autoplay={false}
+                          initialTime='0'
+                          loop={false}
+                          muted={false}
+                          className='cover'
+                        />
+                        {/* <Image className='cover' mode='aspectFit' src={item.coverArr[0]} /> */}
+                        <View className='rightContent'>
+                          <View>
+                            <Text className='title'>{item.title}</Text>
+                            <AtButton onClick={() => handleClickDownload(item.url)} className='btn'>
+                              下载
+                            </AtButton>
                           </View>
-                          <Text className='time'>{item.uploadTime}</Text>
+                          <View className='timeCon'>
+                            <View className='authorCon'>
+                              <Text className='nickname'>{item.author.nickname}</Text>
+                              <Image
+                                className='avatar'
+                                mode='aspectFit'
+                                src={item.author.avatar_thumb.url_list[0]}
+                              />
+                            </View>
+                            <Text className='time'>{item.uploadTime}</Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  </AtCard>
-                );
-              })
+                    </AtCard>
+                  );
+                })}
+              </View>
             )}
           </View>
         </View>

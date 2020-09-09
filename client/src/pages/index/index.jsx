@@ -41,6 +41,7 @@ export default function Index() {
   //   '盘点电影十佳动作场面第二名快餐车！#成龙 #经典 #电影 #抖音热门 https://v.douyin.com/JdwUt1V/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
   const [leftTimes, setLeftTimes] = useState(50);
+  const [downloadTimes, setDownloadTimes] = useState(0);
   console.log('%cleftTimes:', 'color: #0e93e0;background: #aaefe5;', leftTimes);
   const [progress, setProgress] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -319,6 +320,7 @@ export default function Index() {
         data: { openId }
       });
       setLeftTimes(myUserData.result.left);
+      setDownloadTimes(myUserData.result.downloadTimes);
     } catch (error) {
       console.log('%cmyUserData error:', 'color: #0e93e0;background: #aaefe5;', error);
     }
@@ -424,11 +426,12 @@ export default function Index() {
         </AtButton>
       )}
       <View className='versionInfo'>
+        <Text>已使用{downloadTimes}次</Text>
         <AtButton onClick={() => setShowLike(true)} size='small' className='likeBtn'>
           赞赏
         </AtButton>
         <Text>当前版本：</Text>
-        <Text>v1.4.1</Text>
+        <Text>v1.4.2</Text>
       </View>
       <AtModal
         onClose={async () => {
@@ -481,8 +484,9 @@ export default function Index() {
             <Text className='title'>
               亲~程序检测到您的使用次数过多，占用较多资源，是否愿意参与赞赏用于购买服务器资源？
             </Text>
+            <Text className='title'>当前可用次数 {leftTimes} 次</Text>
             <Text className='tip'>
-              注：现因个人维护服务器成本过大，采取每人默认50次使用次数，赞赏后24小时内自动增加使用次数，若未增加，请联系客服
+              注：现因个人维护服务器成本过大，采取每人默认50次使用次数，赞赏后24小时内自动增加使用次数，1元增加10次，若未增加，请联系客服
             </Text>
           </View>
         )}
