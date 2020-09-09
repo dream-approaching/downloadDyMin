@@ -21,7 +21,7 @@ import {
 } from 'taro-ui';
 import step1 from '../../assets/step1.jpg';
 import step2 from '../../assets/step2.jpg';
-import likeImg from '../../assets/like2.png';
+import likeImg from '../../assets/like.jpg';
 import './index.less';
 import MyToast from '../../components/Toast';
 
@@ -40,6 +40,8 @@ export default function Index() {
   // const [value, setValue] = useState(
   //   '盘点电影十佳动作场面第二名快餐车！#成龙 #经典 #电影 #抖音热门 https://v.douyin.com/JdwUt1V/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
+  const [leftTimes, setLeftTimes] = useState(50);
+  console.log('%cleftTimes:', 'color: #0e93e0;background: #aaefe5;', leftTimes);
   const [progress, setProgress] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progressStatus, setProgressStatus] = useState('progress');
@@ -57,6 +59,10 @@ export default function Index() {
     console.log('执行了handleDownload');
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
+      if (leftTimes <= 0) {
+        return setShowLike(true);
+      }
+
       const userInfo = await Taro.getUserInfo();
       Taro.setStorage({ key: 'userInfo', data: userInfo });
       setProgressStatus('progress');
@@ -68,6 +74,7 @@ export default function Index() {
       if (!urlArr) {
         return MyToast('请检查复制的链接是否正确');
       }
+
       const url = urlArr[0];
       console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
       await setAnalyzing(true);
@@ -261,6 +268,21 @@ export default function Index() {
     downloadTaskRef.current = downloadTask;
   }, [downloadTask]);
 
+  useEffect(() => {
+    async function getUserData() {
+      // 查看是否还有下载次数
+      try {
+        const myUserData = await wx.cloud.callFunction({
+          name: 'getUsers'
+        });
+        setLeftTimes(myUserData.result.left);
+      } catch (error) {
+        console.log('%cmyUserData error:', 'color: #0e93e0;background: #aaefe5;', error);
+      }
+    }
+    getUserData();
+  }, []);
+
   // 组件卸载时清除定时器
   useEffect(() => {
     return () => {
@@ -268,6 +290,7 @@ export default function Index() {
     };
   }, [waitFileIdInterval]);
 
+  const [showLike, setShowLike] = useState(false);
   const [showCurtain, setShowCurtain] = useState(false);
   const [curtainImg, setCurtainImg] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -356,24 +379,7 @@ export default function Index() {
           );
         })}
       </AtList>
-      {/* <Image
-        showMenuByLongpress
-        style='width: 300px;height: 300px;background: #fff;'
-        src='cloud://develop-longzi.6465-develop-longzi-1302443537/image/like.jpg'
-        // src='http://storage.jd.com/taro-resource/cases/image5.png'
-      /> */}
-      <AtButton
-        onClick={() => {
-          wx.scanCode({
-            success: res => console.log('res', res),
-            fail: err => console.log('err', err)
-          });
-        }}
-        size='small'
-        className='cancelBtn'
-      >
-        扫码
-      </AtButton>
+
       <AtTextarea
         name='value'
         type='text'
@@ -413,10 +419,18 @@ export default function Index() {
         </AtButton>
       )}
       <View className='versionInfo'>
+        <AtButton onClick={() => setShowLike(true)} size='small' className='likeBtn'>
+          赞赏
+        </AtButton>
         <Text>当前版本：</Text>
         <Text>v1.3.1</Text>
       </View>
-      <AtModal isOpened={modalOpen && !showCurtain}>
+      <AtModal
+        onClose={async () => {
+          await setModalOpen(false);
+        }}
+        isOpened={modalOpen}
+      >
         <AtModalContent>检测到链接：{clipboardText} 是否填入？</AtModalContent>
         <AtModalAction>
           <Button
@@ -441,14 +455,32 @@ export default function Index() {
       </AtModal>
       <AtModal
         className='imgModal'
-        isOpened={showCurtain}
+        isOpened={showCurtain && !showLike}
         onClose={async () => {
-          await setModalOpen(false);
           await setShowCurtain(false);
           setCurtainImg(null);
         }}
       >
         <Image className='tipImg' mode='aspectFit' src={curtainImg} />
+      </AtModal>
+      <AtModal
+        onClose={async () => {
+          await setShowLike(false);
+        }}
+        className='likeModal'
+        isOpened={showLike}
+      >
+        <Image showMenuByLongpress mode='aspectFit' className='likeImg' src={likeImg} />
+        {leftTimes <= 0 && (
+          <View className='likeTextCon'>
+            <Text className='title'>
+              亲~程序检测到您的使用次数过多，占用较多资源，是否愿意参与赞赏用于购买服务器资源？
+            </Text>
+            <Text className='tip'>
+              注：现因个人维护服务器成本过大，采取每人默认50次使用次数，赞赏后24小时内自动增加使用次数，若未增加，请联系客服
+            </Text>
+          </View>
+        )}
       </AtModal>
     </View>
   );
