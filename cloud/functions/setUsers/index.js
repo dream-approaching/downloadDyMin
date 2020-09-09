@@ -48,6 +48,7 @@ exports.main = async (event, context) => {
       downloadArr: [],
       uploadTimes: 0,
       uploadArr: [],
+      left: 50, // 默认允许50次下载，否则弹出赞赏提示
       ...updateObj,
     };
     console.log('%cnewRecordData:', 'color: #0e93e0;background: #aaefe5;', newRecordData);
@@ -68,6 +69,7 @@ exports.main = async (event, context) => {
         datas.uploadTimes = _.inc(1);
       } else {
         datas.downloadTimes = _.inc(1);
+        datas.left = record.left - 1;
         // 判断下载的视频是否已经存在
         const index = record.downloadArr.findIndex((item) => item.url === videoRecord.data.url);
         let times = 0;
@@ -106,6 +108,7 @@ exports.main = async (event, context) => {
         }
       }
     }
+    // datas.left = 50 - record.downloadTimes;
 
     console.log('%cdatas:', 'color: #0e93e0;background: #aaefe5;', datas);
     res = await users.doc(record._id).update({ data: datas });
