@@ -8,7 +8,8 @@ const db = cloud.database();
 const users = db.collection('users');
 
 exports.main = async (event, context) => {
-  let { OPENID } = await cloud.getWXContext();
+  const { openId } = event;
+  let { OPENID = openId } = await cloud.getWXContext();
   console.log('%cOPENID:', 'color: #0e93e0;background: #aaefe5;', OPENID);
   // 先查询用户是否存在
   const filterList = await users

@@ -2,6 +2,7 @@ import Taro, {
   useDidShow,
   useShareAppMessage,
   useState,
+  useEffect,
   useShareTimeline,
   usePullDownRefresh
 } from '@tarojs/taro';
@@ -19,6 +20,16 @@ export default function Mine() {
     setUserInfo(user);
   };
 
+  // 获取openId
+  const [openId, setOpenId] = useState(null);
+  useEffect(() => {
+    async function getOpenId() {
+      const openIdBc = await Taro.getApp().getOpenid();
+      return openIdBc;
+    }
+    getOpenId().then(res => setOpenId(res));
+  }, []);
+
   const [pageLoading, setPageLoading] = useState(true);
   const [downloadList, setdownloadList] = useState([]);
 
@@ -32,7 +43,8 @@ export default function Mine() {
       await setPageLoading(true);
       try {
         const res = await Taro.cloud.callFunction({
-          name: 'getDownloadList'
+          name: 'getDownloadList',
+          data: { openId }
         });
         Taro.hideNavigationBarLoading();
         Taro.hideToast();

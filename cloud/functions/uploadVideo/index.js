@@ -16,7 +16,7 @@ exports.main = async (event) => {
       url
     );
     console.log('%cmusic, author:', 'color: #0e93e0;background: #aaefe5;', music, author);
-    let { OPENID, UNIONID } = await cloud.getWXContext();
+    let { OPENID = userInfo.openId, UNIONID } = await cloud.getWXContext();
     // 先将部分信息写入videos表中，待视频上传完成后更新
     const addRes = await videos.add({
       data: {

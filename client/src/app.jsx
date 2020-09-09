@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import Index from './pages/index';
 
 import './app.less';
+import MyToast from './components/Toast';
 
 // 如果需要在 h5 环境中开启 React Devtools
 // 取消以下注释：
@@ -48,35 +49,43 @@ class App extends Component {
       // 如果已经授权，则更新一下lastLogin
       const authSettings = await Taro.getSetting();
       if (authSettings.authSetting['scope.userInfo']) {
+        const openId = await this.getOpenid();
         const userInfo = await Taro.getUserInfo();
         await wx.cloud.callFunction({
           name: 'setUsers',
-          data: { userInfo, updateObj: { lastLogin: dayjs().format('YYYY-MM-DD HH:mm:ss') } }
-        });
-      }
-
-      // 检查更新
-      const updateManager = Taro.getUpdateManager();
-      updateManager.onCheckForUpdate(function(res) {
-        // 请求完新版本信息的回调
-        console.log('%cres311:', 'color: #0e93e0;background: #aaefe5;', res);
-      });
-      updateManager.onUpdateReady(function() {
-        Taro.showModal({
-          title: '更新提示',
-          content: '新版本已经准备好，是否重启应用？',
-          success: function(res) {
-            if (res.confirm) {
-              // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-              updateManager.applyUpdate();
-            }
+          data: {
+            userInfo: { ...userInfo, openId },
+            updateObj: { lastLogin: dayjs().format('YYYY-MM-DD HH:mm:ss') }
           }
         });
-      });
-      updateManager.onUpdateFailed(function(res) {
-        console.log('%cres326:', 'color: #0e93e0;background: #aaefe5;', res);
-        // 新的版本下载失败
-      });
+
+        // 检查更新
+        const updateManager = Taro.getUpdateManager();
+        updateManager.onCheckForUpdate(function(res) {
+          // 请求完新版本信息的回调
+          console.log('%cres311:', 'color: #0e93e0;background: #aaefe5;', res);
+          // 我自己的openID
+          if (openId === 'os-Aw5Z6jNjBxcIf_4Uzkt6QW2PA') {
+            MyToast(JSON.stringify(res), 3000);
+          }
+        });
+        updateManager.onUpdateReady(function() {
+          Taro.showModal({
+            title: '更新提示',
+            content: '新版本已经准备好，是否重启应用？',
+            success: function(res) {
+              if (res.confirm) {
+                // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+                updateManager.applyUpdate();
+              }
+            }
+          });
+        });
+        updateManager.onUpdateFailed(function(res) {
+          console.log('%cres326:', 'color: #0e93e0;background: #aaefe5;', res);
+          // 新的版本下载失败
+        });
+      }
     }
   }
 
@@ -85,6 +94,18 @@ class App extends Component {
   componentDidHide() {}
 
   componentDidCatchError() {}
+
+  getCloudOpenid = async () => {
+    return (this.openid =
+      this.openid || (await wx.cloud.callFunction({ name: 'login' })).result.OPENID);
+  };
+
+  //最佳方案。
+  getOpenid = async () => {
+    (this.openid = this.openid || wx.getStorageSync('openid')) ||
+      wx.setStorageSync('openid', await this.getCloudOpenid());
+    return this.openid;
+  };
 
   // 在 App 类中的 render() 函数没有实际作用
   // 请勿修改此函数

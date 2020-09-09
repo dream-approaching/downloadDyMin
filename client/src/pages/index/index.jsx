@@ -53,6 +53,16 @@ export default function Index() {
     return values;
   };
 
+  // 获取openId
+  const [openId, setOpenId] = useState(null);
+  useEffect(() => {
+    async function getOpenId() {
+      const openIdBc = await Taro.getApp().getOpenid();
+      return openIdBc;
+    }
+    getOpenId().then(res => setOpenId(res));
+  }, []);
+
   let retryTimes = 0;
   let waitFileIdInterval = null;
   const handleDownload = async ({ urlFromMine }) => {
@@ -118,7 +128,7 @@ export default function Index() {
               try {
                 await wx.cloud.callFunction({
                   name: 'recordDownload',
-                  data: { databaseId, userInfo }
+                  data: { databaseId, userInfo: { ...userInfo, openId } }
                 });
               } catch (error) {
                 console.log('%cerror124:', 'color: #0e93e0;background: #aaefe5;', error);
@@ -129,7 +139,7 @@ export default function Index() {
                 await wx.cloud.callFunction({
                   name: 'setUsers',
                   data: {
-                    userInfo,
+                    userInfo: { ...userInfo, openId },
                     type: 'download',
                     videoId: databaseId
                   }
@@ -182,7 +192,7 @@ export default function Index() {
       // 检查是否已经上传过
       const checkHasVideo = await wx.cloud.callFunction({
         name: 'checkHasVideo',
-        data: { url }
+        data: { url, openId }
       });
       console.log('%ccheckHasVideo:', 'color: #0e93e0;background: #aaefe5;', checkHasVideo);
       if (checkHasVideo.result.length > 0) {
@@ -194,7 +204,7 @@ export default function Index() {
           waitFileIdInterval = setInterval(async () => {
             const againCheck = await wx.cloud.callFunction({
               name: 'checkHasVideo',
-              data: { url }
+              data: { url, openId }
             });
             console.log('%cagainCheck:', 'color: #0e93e0;background: #aaefe5;', againCheck);
             if (againCheck.result[0].fileId) {
@@ -210,7 +220,7 @@ export default function Index() {
         console.log('checkHasVideo.result.length <=0', checkHasVideo.result.length <= 0);
         wx.cloud.callFunction({
           name: 'uploadVideo',
-          data: { url, userInfo },
+          data: { url, userInfo: { ...userInfo, openId } },
           success: uploadRes => {
             console.log('res 144', uploadRes); // 3
             console.log(
@@ -305,7 +315,8 @@ export default function Index() {
     // 查看是否还有下载次数
     try {
       const myUserData = await wx.cloud.callFunction({
-        name: 'getUsers'
+        name: 'getUsers',
+        data: { openId }
       });
       setLeftTimes(myUserData.result.left);
     } catch (error) {
@@ -417,7 +428,7 @@ export default function Index() {
           赞赏
         </AtButton>
         <Text>当前版本：</Text>
-        <Text>v1.4.0</Text>
+        <Text>v1.4.1</Text>
       </View>
       <AtModal
         onClose={async () => {
