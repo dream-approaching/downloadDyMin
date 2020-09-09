@@ -59,10 +59,6 @@ export default function Index() {
     console.log('执行了handleDownload');
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
-      if (leftTimes <= 0) {
-        return setShowLike(true);
-      }
-
       const userInfo = await Taro.getUserInfo();
       Taro.setStorage({ key: 'userInfo', data: userInfo });
       setProgressStatus('progress');
@@ -75,6 +71,9 @@ export default function Index() {
         return MyToast('请检查复制的链接是否正确');
       }
 
+      if (leftTimes <= 0) {
+        return setShowLike(true);
+      }
       const url = urlArr[0];
       console.log('%curl:', 'color: #0e93e0;background: #aaefe5;', url);
       await setAnalyzing(true);
@@ -268,21 +267,6 @@ export default function Index() {
     downloadTaskRef.current = downloadTask;
   }, [downloadTask]);
 
-  useEffect(() => {
-    async function getUserData() {
-      // 查看是否还有下载次数
-      try {
-        const myUserData = await wx.cloud.callFunction({
-          name: 'getUsers'
-        });
-        setLeftTimes(myUserData.result.left);
-      } catch (error) {
-        console.log('%cmyUserData error:', 'color: #0e93e0;background: #aaefe5;', error);
-      }
-    }
-    getUserData();
-  }, []);
-
   // 组件卸载时清除定时器
   useEffect(() => {
     return () => {
@@ -316,6 +300,16 @@ export default function Index() {
       }
     } catch (error) {
       console.log('error 227', error);
+    }
+
+    // 查看是否还有下载次数
+    try {
+      const myUserData = await wx.cloud.callFunction({
+        name: 'getUsers'
+      });
+      setLeftTimes(myUserData.result.left);
+    } catch (error) {
+      console.log('%cmyUserData error:', 'color: #0e93e0;background: #aaefe5;', error);
     }
   });
 
@@ -423,7 +417,7 @@ export default function Index() {
           赞赏
         </AtButton>
         <Text>当前版本：</Text>
-        <Text>v1.3.2</Text>
+        <Text>v1.4.0</Text>
       </View>
       <AtModal
         onClose={async () => {
