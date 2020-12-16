@@ -93,5 +93,25 @@
     color: #666;
     text-align: center;
     width: calc(100% - 32px);
+    .flexCon {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      text {
+        flex: 1;
+      }
+      // padding: 0 25%;
+      .serviceBtn {
+        flex: 1;
+        border: none;
+        font-size: 22px;
+        color: #666;
+        background: transparent;
+        &::after {
+          display: none;
+        }
+      }
+    }
   }
 }

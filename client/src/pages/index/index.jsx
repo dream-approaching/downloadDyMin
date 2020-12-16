@@ -18,6 +18,7 @@ import {
   AtList,
   AtListItem
 } from 'taro-ui';
+import { likeImgInCloud, version } from '../../config';
 import step1 from '../../assets/step1.jpg';
 import step2 from '../../assets/step2.jpg';
 import './index.less';
@@ -25,7 +26,6 @@ import MyToast from '../../components/Toast';
 
 const RETRY_TIMES = 5;
 export default function Index() {
-  const likeImgInCloud = "cloud://develop-longzi.6465-develop-longzi-1302443537/like.jpg"
   // const [value, setValue] = useState(
   //   '这临时反应真的快#一直dou在你身边 @抖音小助手 https://v.douyin.com/JRLkxRy/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
@@ -425,12 +425,14 @@ export default function Index() {
         </AtButton>
       )}
       <View className='versionInfo'>
-        <Text>已使用{downloadTimes}次</Text>
         <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
           赞赏
         </AtButton>
-        <Text>当前版本：</Text>
-        <Text>v1.4.3</Text>
+        <View className='flexCon'>
+          <Text>版本： v{version}</Text>
+          <Button open-type='contact' size='small' className='serviceBtn'>联系客服</Button>
+          <Text>已使用{downloadTimes}次</Text>
+        </View>
       </View>
       <AtModal
         onClose={async () => {
