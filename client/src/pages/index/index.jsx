@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import Taro, {
   useState,
   useRef,
@@ -21,12 +20,12 @@ import {
 } from 'taro-ui';
 import step1 from '../../assets/step1.jpg';
 import step2 from '../../assets/step2.jpg';
-import likeImg from '../../assets/like.jpg';
 import './index.less';
 import MyToast from '../../components/Toast';
 
 const RETRY_TIMES = 5;
 export default function Index() {
+  const likeImgInCloud = "cloud://develop-longzi.6465-develop-longzi-1302443537/like.jpg"
   // const [value, setValue] = useState(
   //   '这临时反应真的快#一直dou在你身边 @抖音小助手 https://v.douyin.com/JRLkxRy/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
@@ -427,11 +426,11 @@ export default function Index() {
       )}
       <View className='versionInfo'>
         <Text>已使用{downloadTimes}次</Text>
-        <AtButton onClick={() => setShowLike(true)} size='small' className='likeBtn'>
+        <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
           赞赏
         </AtButton>
         <Text>当前版本：</Text>
-        <Text>v1.4.2</Text>
+        <Text>v1.4.3</Text>
       </View>
       <AtModal
         onClose={async () => {
@@ -478,12 +477,14 @@ export default function Index() {
         className='likeModal'
         isOpened={showLike}
       >
-        <Image showMenuByLongpress mode='aspectFit' className='likeImg' src={likeImg} />
         {leftTimes <= 0 && (
           <View className='likeTextCon'>
             <Text className='title'>
               亲~程序检测到您的使用次数过多，占用较多资源，是否愿意参与赞赏用于购买服务器资源？
             </Text>
+            <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
+              赞赏
+            </AtButton>
             <Text className='title'>当前可用次数 {leftTimes} 次</Text>
             <Text className='tip'>
               注：现因个人维护服务器成本过大，采取每人默认50次使用次数，赞赏后24小时内自动增加使用次数，1元增加10次，若未增加，请联系客服
