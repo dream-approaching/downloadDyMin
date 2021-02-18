@@ -1,11 +1,10 @@
 import Taro, {
   useDidShow,
   useShareAppMessage,
-  useState,
-  useEffect,
   useShareTimeline,
   usePullDownRefresh
 } from '@tarojs/taro';
+import React, { useState, useEffect, } from 'react'
 import { View, Text, Button, Image, Video } from '@tarojs/components';
 // import dayjs from 'dayjs';
 import { AtMessage, AtCard, AtButton } from 'taro-ui';
@@ -24,7 +23,7 @@ export default function Mine() {
   const [openId, setOpenId] = useState(null);
   useEffect(() => {
     async function getOpenId() {
-      const openIdBc = await Taro.getApp().getOpenid();
+      const openIdBc = await Taro.getApp().$app.getOpenid();
       return openIdBc;
     }
     getOpenId().then(res => setOpenId(res));
@@ -182,8 +181,3 @@ export default function Mine() {
   );
 }
 
-Mine.config = {
-  navigationBarTitleText: '下载历史',
-  enablePullDownRefresh: true,
-  backgroundTextStyle: 'dark'
-};

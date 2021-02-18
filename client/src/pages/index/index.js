@@ -1,11 +1,9 @@
 import Taro, {
-  useState,
-  useRef,
-  useEffect,
   useDidShow,
   useShareAppMessage,
   useShareTimeline
 } from '@tarojs/taro';
+import React, {useEffect, useState, useRef,} from 'react'
 import { View, Text, Button, Image } from '@tarojs/components';
 import {
   AtTextarea,
@@ -25,7 +23,8 @@ import './index.less';
 import MyToast from '../../components/Toast';
 
 const RETRY_TIMES = 5;
-export default function Index() {
+
+export default function Index(){
   // const [value, setValue] = useState(
   //   '这临时反应真的快#一直dou在你身边 @抖音小助手 https://v.douyin.com/JRLkxRy/ 复制此链接，打开【抖音短视频】，直接观看视频！'
   // );
@@ -41,7 +40,6 @@ export default function Index() {
   // );
   const [leftTimes, setLeftTimes] = useState(50);
   const [downloadTimes, setDownloadTimes] = useState(0);
-  console.log('%cleftTimes:', 'color: #0e93e0;background: #aaefe5;', leftTimes);
   const [progress, setProgress] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progressStatus, setProgressStatus] = useState('progress');
@@ -57,7 +55,8 @@ export default function Index() {
   const [openId, setOpenId] = useState(null);
   useEffect(() => {
     async function getOpenId() {
-      const openIdBc = await Taro.getApp().getOpenid();
+      console.log('%c zjs Taro:', 'color: #0e93e0;background: #aaefe5;', Taro.getApp());
+      const openIdBc = await Taro.getApp().$app.getOpenid();
       return openIdBc;
     }
     getOpenId().then(res => setOpenId(res));
@@ -497,7 +496,3 @@ export default function Index() {
     </View>
   );
 }
-
-Index.config = {
-  navigationBarTitleText: '去水印'
-};

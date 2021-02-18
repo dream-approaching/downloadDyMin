@@ -17,5 +17,22 @@
   "typescript.suggestionActions.enabled": false,
   "typescript.surveys.enabled": false,
   "typescript.tsc.autoDetect": "off",
-  "typescript.validate.enable": false
+  "typescript.validate.enable": false,
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#94abe0",
+    "activityBar.activeBorder": "#c63964",
+    "activityBar.background": "#94abe0",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#c63964",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "statusBar.background": "#6c8cd5",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#446dca",
+    "titleBar.activeBackground": "#6c8cd5",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#6c8cd599",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#6C8CD5"
 }

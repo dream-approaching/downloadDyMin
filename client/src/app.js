@@ -1,9 +1,7 @@
-import Taro, { Component } from '@tarojs/taro';
+import Taro from '@tarojs/taro'
+import React, { Component } from 'react';
 import 'taro-ui/dist/style/index.scss';
 import dayjs from 'dayjs';
-import Index from './pages/index';
-
-import './app.less';
 import MyToast from './components/Toast';
 
 // 如果需要在 h5 环境中开启 React Devtools
@@ -13,34 +11,6 @@ import MyToast from './components/Toast';
 // }
 
 class App extends Component {
-  config = {
-    pages: ['pages/index/index', 'pages/mine/index'],
-    window: {
-      backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
-      navigationBarTextStyle: 'black'
-    },
-    cloud: true,
-    tabBar: {
-      color: '#666',
-      selectedColor: '#5790e4',
-      list: [
-        {
-          pagePath: 'pages/index/index',
-          // text: '下载',
-          iconPath: 'assets/download.png',
-          selectedIconPath: 'assets/download_a.png'
-        },
-        {
-          pagePath: 'pages/mine/index',
-          // text: '历史',
-          iconPath: 'assets/mine.png',
-          selectedIconPath: 'assets/mine_a.png'
-        }
-      ]
-    }
-  };
 
   async componentDidMount() {
     if (process.env.TARO_ENV === 'weapp') {
@@ -110,8 +80,8 @@ class App extends Component {
   // 在 App 类中的 render() 函数没有实际作用
   // 请勿修改此函数
   render() {
-    return <Index />;
+    return this.props.children;
   }
 }
 
-Taro.render(<App />, document.getElementById('app'));
+export default App;
