@@ -100,17 +100,19 @@ exports.main = async (event, context) => {
             downloadTimesMine: times + 1,
             status: STATUS.show,
           });
-        }
-        // 只保留最近50条
-        if (datas.downloadArr.length >= 50) {
-          const only50 = datas.downloadArr.slice(0, 50);
-          datas.downloadArr = only50;
+      
+          // 只保留近100天内的至多30条历史数据
+          const onehundredDay = dayjs().subtract(100, 'day')
+          const withInList =  datas.downloadArr ? datas.downloadArr.filter(item => dayjs(item.uploadTime).isAfter(onehundredDay)) : []
+          console.log('%c zjs withInList:', 'color: #0e93e0;background: #aaefe5;', withInList);
+          if (withInList.length >= 30) {
+            const only30 = withInList.slice(0, 30);
+            datas.downloadArr = only30;
+          }
         }
       }
     }
-    // datas.left = 50 - record.downloadTimes;
 
-    console.log('%cdatas:', 'color: #0e93e0;background: #aaefe5;', datas);
     res = await users.doc(record._id).update({ data: datas });
   }
   return res;

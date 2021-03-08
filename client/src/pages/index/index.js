@@ -55,7 +55,6 @@ export default function Index(){
   const [openId, setOpenId] = useState(null);
   useEffect(() => {
     async function getOpenId() {
-      console.log('%c zjs Taro:', 'color: #0e93e0;background: #aaefe5;', Taro.getApp());
       const openIdBc = await Taro.getApp().$app.getOpenid();
       return openIdBc;
     }
@@ -109,6 +108,9 @@ export default function Index(){
             retryTimes = 0;
             // 界面逻辑
             setdownloadTask(null);
+
+            // 3s 后隐藏进度条
+            setTimeout(() => setProgress(null), 3000)
             console.log(
               '%cdownloadTaskRef:',
               'color: #0e93e0;background: #aaefe5;',
@@ -481,7 +483,7 @@ export default function Index(){
         {leftTimes <= 0 && (
           <View className='likeTextCon'>
             <Text className='title'>
-              亲~程序检测到您的使用次数过多，占用较多资源，是否愿意参与赞赏用于购买服务器资源？
+              亲~程序检测到您的使用次数过多，占用较多资源，因个人小程序无法接入微信支付，是否愿意参与赞赏用于购买服务器资源？
             </Text>
             <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
               赞赏
