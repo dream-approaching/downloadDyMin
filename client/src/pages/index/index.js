@@ -134,16 +134,17 @@ export default function Index(){
               } catch (error) {
                 console.log('%cerror124:', 'color: #0e93e0;background: #aaefe5;', error);
               }
-
+              const data = {
+                userInfo: { ...userInfo, openId },
+                type: 'download',
+                videoId: databaseId
+              }
+              console.log('%c zjs data:', 'color: #0e93e0;background: #aaefe5;', JSON.stringify(data));
               // 调用云函数接口 用户增加下载次数
               try {
                 await wx.cloud.callFunction({
                   name: 'setUsers',
-                  data: {
-                    userInfo: { ...userInfo, openId },
-                    type: 'download',
-                    videoId: databaseId
-                  }
+                  data
                 });
               } catch (error) {
                 console.log('%cerror138:', 'color: #0e93e0;background: #aaefe5;', error);

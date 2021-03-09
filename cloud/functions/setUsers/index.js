@@ -51,20 +51,17 @@ exports.main = async (event, context) => {
       left: 50, // 默认允许50次下载，否则弹出赞赏提示
       ...updateObj,
     };
-    console.log('%cnewRecordData:', 'color: #0e93e0;background: #aaefe5;', newRecordData);
     res = await users.add({
       data: newRecordData,
     });
   } else {
     const record = filterList.data[0];
-    console.log('%crecord:', 'color: #0e93e0;background: #aaefe5;', record);
     const datas = {
       ...updateObj,
       updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     };
     if (type === 'upload' || type === 'download') {
       const videoRecord = await videos.doc(event.videoId).get();
-      console.log('%cvideoRecord:', 'color: #0e93e0;background: #aaefe5;', videoRecord);
       if (type === 'upload') {
         datas.uploadTimes = _.inc(1);
       } else {
@@ -83,6 +80,17 @@ exports.main = async (event, context) => {
             { ...videoRecord.data, downloadTimesMine: times + 1, status: STATUS.show },
           ];
         } else {
+      
+          // 只保留近100天内的至多30条历史数据
+          const onehundredDay = dayjs().subtract(100, 'day')
+          console.log('%c zjs datas.downloadArr:', 'color: #0e93e0;background: #aaefe5;', datas.downloadArr);
+          const withInList =  datas.downloadArr ? datas.downloadArr.filter(item => dayjs(item.uploadTime).isAfter(onehundredDay)) : []
+          console.log('%c zjs withInList:', 'color: #0e93e0;background: #aaefe5;', withInList);
+          if (withInList.length >= 30) {
+            const only30 = withInList.slice(0, 30);
+            datas.downloadArr = only30;
+          }
+          
           datas.downloadArr = _.push({
             _id: videoRecord.data._id,
             coverArr: [videoRecord.data.coverArr[0]],
@@ -100,15 +108,6 @@ exports.main = async (event, context) => {
             downloadTimesMine: times + 1,
             status: STATUS.show,
           });
-      
-          // 只保留近100天内的至多30条历史数据
-          const onehundredDay = dayjs().subtract(100, 'day')
-          const withInList =  datas.downloadArr ? datas.downloadArr.filter(item => dayjs(item.uploadTime).isAfter(onehundredDay)) : []
-          console.log('%c zjs withInList:', 'color: #0e93e0;background: #aaefe5;', withInList);
-          if (withInList.length >= 30) {
-            const only30 = withInList.slice(0, 30);
-            datas.downloadArr = only30;
-          }
         }
       }
     }
