@@ -491,7 +491,7 @@ export default function Index(){
             </AtButton>
             <Text className='title'>当前可用次数 {leftTimes} 次</Text>
             <Text className='tip'>
-              注：现因个人维护服务器成本过大，采取每人默认50次使用次数，赞赏后24小时内自动增加使用次数，1元增加10次，若未增加，请联系客服
+              注：现因个人维护服务器成本过大，采取每人默认30次使用次数，赞赏后24小时内自动增加使用次数，1元增加5次，若未增加，请联系客服
             </Text>
           </View>
         )}

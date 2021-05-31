@@ -48,7 +48,7 @@ exports.main = async (event, context) => {
       downloadArr: [],
       uploadTimes: 0,
       uploadArr: [],
-      left: 50, // 默认允许50次下载，否则弹出赞赏提示
+      left: 30, // 默认允许30次下载，否则弹出赞赏提示
       ...updateObj,
     };
     res = await users.add({
@@ -81,8 +81,8 @@ exports.main = async (event, context) => {
           ];
         } else {
       
-          // 只保留近100天内的至多30条历史数据
-          const onehundredDay = dayjs().subtract(100, 'day')
+          // 只保留近60天内的至多30条历史数据
+          const onehundredDay = dayjs().subtract(60, 'day')
           console.log('%c zjs datas.downloadArr:', 'color: #0e93e0;background: #aaefe5;', datas.downloadArr);
           const withInList =  datas.downloadArr ? datas.downloadArr.filter(item => dayjs(item.uploadTime).isAfter(onehundredDay)) : []
           console.log('%c zjs withInList:', 'color: #0e93e0;background: #aaefe5;', withInList);

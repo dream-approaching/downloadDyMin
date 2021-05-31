@@ -123,7 +123,7 @@ export default function Mine() {
           </View> */}
           <View>
             <View className='tipCon'>
-              <Text className='tip'>只保留近100天内的至多30条历史数据</Text>
+              <Text className='tip'>只保留近60天内的至多30条历史数据</Text>
             </View>
             {!downloadList.length && !pageLoading ? (
               <AtCard title='暂无历史记录'></AtCard>
