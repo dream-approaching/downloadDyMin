@@ -4,7 +4,7 @@ import Taro, {
   useShareTimeline
 } from '@tarojs/taro';
 import React, {useEffect, useState, useRef,} from 'react'
-import { View, Text, Button, Image } from '@tarojs/components';
+import { View, Text, Button, Image, Ad } from '@tarojs/components';
 import {
   AtTextarea,
   AtButton,
@@ -352,7 +352,7 @@ export default function Index(){
     Taro.setClipboardData({
       data: ' ',
       success: wx.hideToast,
-      fail: err => console.log('err276', err)
+      fail: err => console.log('err355', err)
     });
 
   const isDownloading = progress && progress.percent !== 100 && progressStatus === 'progress';
@@ -365,9 +365,6 @@ export default function Index(){
   return (
     <View className='index'>
       <AtMessage />
-      <View className='title'>
-        <Text>说明</Text>
-      </View>
       <AtList hasBorder={false} className='list'>
         {tipArr.map(item => {
           return (
@@ -398,7 +395,7 @@ export default function Index(){
         // autoFocus
         border
         maxLength={240}
-        height={220}
+        height={200}
         adjustPosition
         className='input'
       />
@@ -427,9 +424,12 @@ export default function Index(){
         </AtButton>
       )}
       <View className='versionInfo'>
-        <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
+        {/* <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
           赞赏
-        </AtButton>
+        </AtButton> */}
+        <View class="bannerAdContainer">
+          <Ad unitId="adunit-5e2c86dc9b0847b8" adIntervals="30"></Ad>
+        </View>
         <View className='flexCon'>
           <Text>版本： v{version}</Text>
           <Button open-type='contact' size='small' className='serviceBtn'>联系客服</Button>
@@ -484,14 +484,14 @@ export default function Index(){
         {leftTimes <= 0 && (
           <View className='likeTextCon'>
             <Text className='title'>
-              亲~程序检测到您的使用次数过多，占用较多资源，因个人小程序无法接入微信支付，是否愿意参与赞赏用于购买服务器资源？
+              亲~程序检测到您的使用次数过多，占用较多资源，因个人小程序无法接入微信支付，若需进一步使用，烦请添加客服微信购买次数后即可增加次数
             </Text>
             <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
-              赞赏
+              联系客服
             </AtButton>
             <Text className='title'>当前可用次数 {leftTimes} 次</Text>
             <Text className='tip'>
-              注：现因个人维护服务器成本过大，采取每人默认30次使用次数，赞赏后24小时内自动增加使用次数，1元增加5次，若未增加，请联系客服
+              注：现因个人维护服务器成本过大，采取每人默认30次使用次数，联系客服添加，1元增加5次
             </Text>
           </View>
         )}
