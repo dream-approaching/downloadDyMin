@@ -61,9 +61,55 @@ export default function Index(){
     getOpenId().then(res => setOpenId(res));
   }, []);
 
+
+  const [rewardedVideoAd, setRewardedVideoAd] = useState(null)
+  useEffect(() => {
+    if(wx.createRewardedVideoAd){
+      const adArr = ['adunit-e7374b8042ca7d75', 'adunit-4e6f0e852953693f', 'adunit-a744bbb5daea97b0']
+      const random = parseInt(Math.random() * 3, 10) // 0-2随机数
+      let videoAd = wx.createRewardedVideoAd({ adUnitId: adArr[random] })
+      videoAd.onLoad(() => {
+        console.log('onLoad event emit')
+      })
+      videoAd.onError((err) => {
+        console.log('onError event emit', err)
+      })
+      videoAd.onClose(async ({isEnded}) => {
+        if (isEnded) {
+          setShowLike(false)
+          handleDownload({afterAd: true})
+        } else {
+          Taro.atMessage({
+            message: '视频未播放完毕，无法进行下载',
+            type: 'warning'
+          });
+        }
+      })
+      setRewardedVideoAd(videoAd)
+    }
+  }, [])
+
+  // 显示激励广告
+  const showAd = () => {
+    if (rewardedVideoAd) {
+      Taro.setStorage({ key: 'storageValue', data: value });
+      rewardedVideoAd.show().catch(() => {
+        // 失败重试
+        rewardedVideoAd.load()
+          .then(() => rewardedVideoAd.show())
+          .catch(err => {
+            Taro.atMessage({
+              message: '激励视频 广告显示失败',
+              type: 'error'
+            });
+          })
+      })
+    }
+  }
+
   let retryTimes = 0;
   let waitFileIdInterval = null;
-  const handleDownload = async ({ urlFromMine }) => {
+  const handleDownload = async ({ urlFromMine, afterAd }) => {
     console.log('执行了handleDownload');
     const authSettings = await Taro.getSetting();
     if (authSettings.authSetting['scope.userInfo']) {
@@ -74,12 +120,15 @@ export default function Index(){
         return MyToast('正在下载，请稍候...');
       }
       const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-)+)/g;
-      const urlArr = urlFromMine ? [urlFromMine] : value.trim().match(reg);
+      const checkValue = afterAd ? Taro.getStorageSync('storageValue') : value;
+      const urlArr = urlFromMine ? [urlFromMine] : checkValue.trim().match(reg);
+      console.log('%czjs urlArr:', 'color: #cc93e0;background: #bbefe5;', urlArr)
       if (!urlArr) {
         return MyToast('请检查复制的链接是否正确');
       }
+      Taro.setStorage({ key: 'storageValue', data: '' });
 
-      if (leftTimes <= 0) {
+      if (leftTimes <= 0 && !afterAd) {
         return setShowLike(true);
       }
       const url = urlArr[0];
@@ -362,6 +411,7 @@ export default function Index(){
     { id: 3, title: '打开小程序，自动识别链接(若识别失败请手动粘贴)' },
     { id: 4, title: '点击下载' }
   ];
+
   return (
     <View className='index'>
       <AtMessage />
@@ -480,19 +530,27 @@ export default function Index(){
         }}
         className='likeModal'
         isOpened={showLike}
+        // isOpened
+        cancelText='取消'
+  confirmText='确认'
       >
         {leftTimes <= 0 && (
           <View className='likeTextCon'>
             <Text className='title'>
-              亲~程序检测到您的使用次数过多，占用较多资源，因个人小程序无法接入微信支付，若需进一步使用，烦请添加客服微信购买次数后即可增加次数
+              亲~程序检测到您的使用次数过多，占用较多资源，观看广告后即可免费下载，或添加客服微信购买次数
             </Text>
+            
+            <Text className='tip'>
+              注：采取每人默认10次使用次数，超过之后0.2/元  
+            </Text>
+            <AtModalAction> 
+            <AtButton onClick={showAd} size='small' className='likeBtn'>
+              查看广告
+            </AtButton>
             <AtButton onClick={() => wx.previewImage({ urls: [likeImgInCloud] })} size='small' className='likeBtn'>
               联系客服
             </AtButton>
-            <Text className='title'>当前可用次数 {leftTimes} 次</Text>
-            <Text className='tip'>
-              注：现因个人维护服务器成本过大，采取每人默认30次使用次数，联系客服添加，1元增加5次
-            </Text>
+            </AtModalAction>
           </View>
         )}
       </AtModal>

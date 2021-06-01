@@ -105,6 +105,12 @@ export default function Mine() {
     }
   };
 
+  const bindadload = (e) => {
+    console.log('bindadload', e)
+ }
+  const bindaderror = (e) => {
+    console.log('bindaderror', e)
+ }
   console.log('%cdownloadList:', 'color: #0e93e0;background: #aaefe5;', downloadList);
   return (
     <View className='container'>
@@ -147,6 +153,7 @@ export default function Mine() {
                           loop={false}
                           muted={false}
                           className='cover'
+                          adUnitId="adunit-11e83068445d2fef"
                         />
                         {/* <Image className='cover' mode='aspectFit' src={item.coverArr[0]} /> */}
                         <View className='rightContent'>
