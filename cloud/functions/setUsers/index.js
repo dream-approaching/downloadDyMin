@@ -48,7 +48,7 @@ exports.main = async (event, context) => {
       downloadArr: [],
       uploadTimes: 0,
       uploadArr: [],
-      left: 30, // 默认允许30次下载，否则弹出赞赏提示
+      left: 10, // 默认允许10次下载，否则弹出赞赏提示
       ...updateObj,
     };
     res = await users.add({
