@@ -593,22 +593,22 @@ export default function Index() {
         {leftTimes <= 0 && (
           <View className="likeTextCon">
             <Text className="title">
-              亲~程序检测到您的使用次数过多，占用较多资源，观看广告后即可免费下载，或添加客服微信购买次数
+              温馨提示，您的使用次数已用完，观看广告后方可免费下载，或添加客服微信购买次数
             </Text>
 
             <Text className="tip">
-              注：采取每人默认10次使用次数，超过之后0.2/元
+              注：采取每人免费10次使用次数，超过之后0.2/元
             </Text>
             <AtModalAction>
               <AtButton onClick={showAd} size="small" className="likeBtn">
-                查看广告
+                看广告
               </AtButton>
               <AtButton
                 onClick={() => wx.previewImage({ urls: [likeImgInCloud] })}
                 size="small"
                 className="likeBtn"
               >
-                联系客服
+                加客服
               </AtButton>
             </AtModalAction>
           </View>
