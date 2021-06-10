@@ -112,6 +112,7 @@ class App extends Component {
         });
       });
     }
+    callback && callback(userInStorage);
     return userInStorage;
   };
 
